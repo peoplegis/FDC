@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html> 
+	<head>
+	<title>MassGIS Field Data Collection</title>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!--
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" />
+	<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js"></script>
+-->
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/ui-lightness/jquery-ui.min.css" type="text/css">
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script src="js/underscore.js"></script>
+	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+	<script src="http://cloud.github.com/downloads/jaubourg/jquery-jsonp/jquery.jsonp-2.4.0.min.js"></script>
+
+	<script src="js/jsrender.1.0.pre.b34.js"></script>
+	<script src="js/jquery.scrollTo-1.4.3.1-min.js"></script>
+	<script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+
+	<link rel="stylesheet" href="css/style.mobile.css" type="text/css">
+	<link rel="stylesheet" href="css/style.mobile-jq.css" type="text/css">
+	<script src="js/proj4js-compressed.js"></script>
+	<script>
+		Proj4js.defs["EPSG:26986"] = "+title=Massachusetts Mainland NAD83 +proj=lcc +lat_1=42.68333333333333 +lat_2=41.71666666666667 +lat_0=41 +lon_0=-71.5 +x_0=200000 +y_0=750000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
+	</script>
+<!--
+	<script src="js/OpenLayers-2.12.massgis_mft-min.js"></script>
+	<script src="js/OpenLayers-2.12.massgis_mft.js"></script>
+-->
+	<script type="text/javascript">
+var MASSGIS = {};
+MASSGIS.proxy = "/fdc/proxy.php";
+
+// customize GPS point styling here
+MASSGIS.pointRadius = "10"; // size of point
+MASSGIS.fillColor = "#00ff00"; // color on the inside of the point
+MASSGIS.strokeColor = "#00ce18"; // color for the point outline (circumference border)
+MASSGIS.strokeWidth = "2"; // size of the point outline (circumference border width)
+MASSGIS.fillOpacity = .7; // opacity of gps point (0 = completely clear, 1 = fully opaque, .5 = half transparent)
+	</script>
+	<script src="js/OpenLayers-2.12.massgis_mft-min.js"></script>
+	<script src="js/massgis_mft.js"></script>
+	<script src="js/peoplegis.mobile.gps_map_controls.js"></script>
+	<script src="js/rtree.js"></script>
+
+	<style>
+	.modalWindow {
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		z-index: 150000;
+		background: white;
+		opacity: 0.7;
+	}
+
+	.ui-loader{
+		z-index: 150001;
+	}
+
+	.ui-icon-mft-sattelite {
+		background-position: 0 0;
+	}
+
+	.ui-icon-mgis-delete {
+		background-image: url("img/delete.png");
+		background-size: 19px;
+		background-position: 0 0;
+	}
+
+	.ui-icon-mgis-copy {
+		background-image: url("img/copy.png");
+		background-size: 19px;
+		background-position: 0 0;
+	}
+
+	.ui-icon-mgis-edit {
+		background-image: url("img/edit.png");
+		background-size: 19px;
+		background-position: 0 0;
+	}
+
+	.ui-listview-filter {
+		margin: 0;
+	}
+	.ui-mobile #map img {
+		max-width: 256px;
+	}
+
+	.ui-autocomplete {
+		z-index: 100000;
+	}
+
+	.ui-autocomplete.ui-widget-content {
+		background: #eee 50% top repeat-x;
+	}
+
+	.half-frame {
+		width: 50%;
+		height: 100%;
+		position: relative;
+		display: inline-block;
+		float: left;
+		overflow: hidden;
+	}
+
+	#map {
+		//height: 400px;
+	}
+	#gps_controls {
+		position: absolute;
+		right: 40px;
+		top: 5px;
+		z-index:100000;
+	}
+	#layer_switcher {
+		position: absolute;
+		right: 40px;
+		top: 140px;
+		z-index:1000;
+	}
+	#settings {
+		position: absolute;
+		left: 40px;
+		bottom: 20px;
+		z-index:100000;
+	}
+	#zoom_buttons {
+		position: absolute;
+		left: 40px;
+		top: 5px;
+		z-index:100000;
+	}
+	#zoom_buttons .ui-icon-minus {
+		top: 36%;
+	}
+	#zoom_buttons .ui-icon-plus {
+		top: 36%;
+	}
+	.ui-icon.ui-icon-shadow.ui-icon-mft-sattelite {
+		background-image: url("img/sattelite_icon.png");
+		width: 72px;
+		height: 48px;
+		left: 20%;
+		bottom: 20%;
+	}
+	#layer_switcher .ui-btn-text {
+		color : #fff !important;
+		text-shadow:
+		-1px -1px 0 #222,
+		1px -1px 0 #222,
+		-1px 1px 0 #222,
+		1px 1px 0 #222 !important;  
+	}
+	.custom_button {
+		height : 32px !important;
+		line-height : 12px !important;
+		margin : .2em 0 !important;
+	}
+
+	</style>
+	<script>
+	// stop page from "bouncing"
+	document.ontouchmove = function(e){
+		e.preventDefault();
+	}
+	$(document).ready(function() {
+		$('#linked_addrs,#addr_list').each(function(idx, elt) {
+			elt.ontouchmove = function(e) {
+				e.stopPropagation();
+			};
+		});
+	});
+	var fixgeometry = function() {
+		scroll(0, 0);
+
+		$(["linked_addrs","addr_list"]).each(function(idx, eltId) {
+			/* Calculate the geometry that our content area should take */
+			var section = $('#' + eltId);
+			var buttons = $('#' + eltId + "_buttons");
+			var parent_height = section.parent().height();
+			section.height(parent_height - buttons.height());
+			$('#' + eltId + " > div").height(parent_height - buttons.height() - $('#' + eltId + " > header").height());
+		});
+	};
+
+</script>
+
+</head>
+<body class="dont_scroll">
+	<div data-role="page" id="mappage">
+		<div id="edit_popup" data-role="popup" class="ui-content" style="padding:20px">
+			<h2>Edit Address</h2>
+			<div>
+				<div style="float:left; width:15%; padding-left: 10px">
+					<input type="text" id="edit_FULL_NUMBER_STANDARDIZED" maxlength="30" data-mini="true" placeholder="addr #" />
+				</div>
+				<div style="float:left; width:55%; padding-left:10px">
+					<input type="text" id="edit_STREET_NAME" maxlength="80" data-mini="true" placeholder="street name" />
+				</div>
+				<div style="float:left; width:22%; padding-left:10px">
+					<input type="text" id="edit_REL_LOC" maxlength="80" data-mini="true" placeholder="location" />
+				</div>
+				<div style="clear: both; float:left; width:25%; padding-left: 10px">
+					<input type="text" id="edit_UNIT" maxlength="40" data-mini="true" placeholder="unit #" />
+				</div>
+				<div style="float:left; width:25%; padding-left: 10px">
+					<input type="text" id="edit_SITE_NAME" maxlength="150" data-mini="true" placeholder="site name" />
+				</div>
+				<div style="float:left; width:42%; padding-left:10px">
+					<input type="text" id="edit_BUILDING_NAME" maxlength="50" data-mini="true" placeholder="building" />
+				</div>
+				<div style="clear: both; float:left; width:95%; padding-left:10px">
+					<input type="text" id="edit_LAST_EDIT_COMMENTS" maxlength="200" data-mini="true" placeholder="notes" />
+				</div>
+				<div style="clear: both">
+					<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" class="ui-btn-right">Cancel</a>
+					<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="check" class="ui-btn-right">Save</a>
+				</div>
+			</div>
+		</div>
+		<div id="delete_or_ignore_popup" data-role="popup" class="ui-content" style="padding:20px; max-width: 80%">
+			<div>
+				<div style="clear: both">
+					<div style="margin-bottom: 10px">
+						If this point does not represent any kind of structure at all, please tap "Delete This Point"
+					</div>
+					<div style="margin-bottom: 10px">
+						If this point represents a structure that is not a "primary structure" of any kind,
+						and you would like to ignore it for the purposes of
+						address standardization in this town, please tap "Ignore This Point"
+					</div>
+					<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" class="ui-btn-right">Delete This Point</a>
+					<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="minus" class="ui-btn-right">Ignore This Point</a>
+					<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="back" class="ui-btn-right">Do Nothing (Go Back)</a>
+				</div>
+			</div>
+		</div>
+		<div data-role="content">
+			<div class="half-frame" id="map_half-frame">
+				<div id="map"></div>
+				<div id="gps_controls"></div>
+				<div id="layer_switcher">
+					<div data-role="fieldcontain">
+						<a href="#" data-iconpos="bottom" data-role="button" data-theme="b" data-icon="mft-sattelite">aerials</a>
+					</div>
+				</div>
+				<div id="settings">
+					<div data-role="fieldcontain">
+						<a href="#settingspage" data-role="button" data-theme="b" data-icon="gear">Settings</a>
+					</div>
+				</div>
+				<div id="zoom_buttons">
+					<div data-role="fieldcontain">
+						<fieldset data-role="controlgroup">
+							<input type="button" data-theme="b" data-iconpos="top" data-icon="plus" id="zoom_in" value="&nbsp;"/>
+							<input type="button" data-theme="b" data-iconpos="bottom" data-icon="minus" id="zoom_out" value="&nbsp;"/>
+						</fieldset>
+					</div>
+				</div>
+			</div>
+			<div class="half-frame" id="list_half-frame" style="border-left: 1px solid #555; margin-right: -1px;">
+				<div style="height: 100%">
+					<div style="height:50%;">
+						<section class="panel_box" id="linked_addrs">
+							<header><h2>Linked Addresses</h2></header>
+							<div style="overflow: auto;">
+								<ul data-role="listview" data-inset="true">
+								</ul>
+							</div>
+						</section>
+						<div data-role="navbar" id="linked_addrs_buttons">
+							<ul>
+								<li><a id="link_button" class="noActivePersist" href="#">Link</a></li>
+								<li><a id="clear_button" class="noActivePersist" href="#">Clear</a></li>
+								<li><a id="add_addr_button" class="noActivePersist" href="#">New Address</a></li>
+								<li><a class="noActivePersist" id="undo_button" href="#">Undo</a></li>
+							</ul>
+						</div>
+					</div>
+					<div style="height:50%;">
+						<section class="panel_box" id="addr_query" style="display:none">
+							<header><h2>Search for Addresses</h2></header>
+							<div id="addr_query_inputs" style="height:84px;">
+								<div style="float:left; width:15%; padding-left: 10px">
+									<input type="text" id="FULL_NUMBER_STANDARDIZED" data-mini="true" placeholder="addr #" />
+								</div>
+								<div style="float:left; width:55%; padding-left: 10px">
+									<input type="text" id="STREET_NAME" data-mini="true" placeholder="street name" />
+								</div>
+								<div style="float:right; width:22%; padding-right:10px">
+									<input type="text" id="REL_LOC" data-mini="true" placeholder="location" />
+								</div>
+								<div style="clear: both; float:left; width:15%; padding-left:10px">
+									<input type="text" id="UNIT" data-mini="true" placeholder="unit #" />
+								</div>
+								<div style="float:left; width:27%; padding-left:10px">
+									<input type="text" id="SITE_NAME" data-mini="true" placeholder="site name" />
+								</div>
+								<div style="float:left; width:26%; padding-left: 12px">
+									<input type="text" id="BUILDING_NAME" data-mini="true" placeholder="building" />
+								</div>
+								<div style="float:right; width:22%; padding-right:10px">
+									<a class="custom_button" data-theme="b" data-role="button" id="select_all_addr">Select all</a>
+								</div>
+							</div>
+							<div id="addr_query_res" style="overflow: auto;">
+								<ul data-role="listview" data-inset="true">
+
+								</ul>
+							</div>
+						</section>
+						<section class="panel_box" id="addr_list">
+							<header><h2>Address List</h2></header>
+							<div style="overflow: auto;">
+								<ul data-role="listview" data-inset="true">
+
+								</ul>
+							</div>
+						</section>
+						<div data-role="navbar" id="addr_list_buttons">
+							<ul>
+								<li><a class="ui-btn-active" id="search_street" href="#">By Street</a></li>
+								<li><a id="search_proximity" href="#">By Proximity</a></li>
+								<li><a id="search_query" href="#">By Query</a></li>
+								<li><a id="search_status" href="#">By Status</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div data-role="page" id="pickaddrpage">
+		<div data-role="header">
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#mappage">Map</a></li>
+					<li><a href="#unlocaddrlistpage">Unlocated Addresses</a></li>
+					<li><a href="#settingspage">Settings</a></li>
+				</ul>
+			</div>
+		</div>
+		<div data-role="content" id="pickAddrPageContent"">
+		</div>
+		<div data-role="footer" style="max-height: 40%; overflow: auto">
+			<a href="#" data-role="button" data-icon="back" onclick="history.back()">Back</a>
+		</div>
+	</div>
+
+	<div data-role="page" id="settingspage">
+		<div data-role="content">
+			<!--<div id="qunit"></div>-->
+			<div data-role="fieldcontain">
+				<a href="#mappage" style="position: absolute; right: 40px;" data-role="button" data-theme="c" data-icon="arrow-l">Back to Map</a>
+			</div>
+			<h3 style="text-align: center" ><span id="settings_maf"></span> Addresses Currently Stored</h3>
+			<h3 style="text-align: center" ><span id="settings_addrs"></span> Address Points Currently Stored</h3>
+
+			<div data-role="fieldcontain" style="text-align: center;padding-top:30px">
+				<label style="width: 24%; vertical-align: middle" for="msag_community" class="select"><h3>MSAG Community:</h3></label>
+				<select id="msag_community">
+					<option value="">Select an MSAG Community...</option>
+<!--
+						<option value='1'>ABINGTON</option>
+						<option value='2'>ACTON</option>
+						<option value='3'>ACUSHNET</option>
+						<option value='4'>ADAMS</option>
+						<option value='5'>AGAWAM</option>
+						<option value='6'>ALFORD</option>
+						<option value='7'>AMESBURY</option>
+						<option value='8'>AMHERST</option>
+						<option value='9'>ANDOVER</option>
+						<option value='10'>AQUINNAH</option>
+						<option value='11'>ARLINGTON</option>
+						<option value='12'>ASHBURNHAM</option>
+						<option value='13'>ASHBY</option>
+						<option value='14'>ASHFIELD</option>
+						<option value='15'>ASHLAND</option>
+						<option value='16'>ATHOL</option>
+						<option value='17'>ATTLEBORO</option>
+						<option value='18'>AUBURN</option>
+						<option value='19'>AVON</option>
+						<option value='20'>AYER</option>
+						<option value='21'>BARNSTABLE</option>
+						<option value='22'>BARRE</option>
+						<option value='23'>BECKET</option>
+						<option value='24'>BEDFORD</option>
+						<option value='25'>BELCHERTOWN</option>
+						<option value='26'>BELLINGHAM</option>
+						<option value='27'>BELMONT</option>
+						<option value='28'>BERKLEY</option>
+						<option value='29'>BERLIN</option>
+						<option value='30'>BERNARDSTON</option>
+						<option value='31'>BEVERLY</option>
+						<option value='32'>BILLERICA</option>
+						<option value='33'>BLACKSTONE</option>
+						<option value='34'>BLANDFORD</option>
+						<option value='35'>BOLTON</option>
+						<option value='36'>BONDSVILLE</option>
+						<option value='37'>BOSTON</option>
+						<option value='38'>BOURNE</option>
+						<option value='39'>BOXBORO</option>
+						<option value='40'>BOXFORD</option>
+						<option value='41'>BOYLSTON</option>
+						<option value='42'>BRAINTREE</option>
+						<option value='43'>BREWSTER</option>
+						<option value='44'>BRIDGEWATER</option>
+						<option value='45'>BRIGHTON</option>
+						<option value='46'>BRIMFIELD</option>
+						<option value='47'>BROCKTON</option>
+						<option value='48'>BROOKFIELD</option>
+						<option value='49'>BROOKLINE</option>
+						<option value='50'>BUCKLAND</option>
+						<option value='51'>BURLINGTON</option>
+						<option value='52'>CAMBRIDGE</option>
+						<option value='53'>CANTON</option>
+						<option value='54'>CARLISLE</option>
+						<option value='55'>CARVER</option>
+						<option value='56'>CENTERVILLE</option>
+						<option value='57'>CHARLEMONT</option>
+						<option value='58'>CHARLESTOWN</option>
+						<option value='59'>CHARLTON</option>
+						<option value='60'>CHATHAM</option>
+						<option value='61'>CHELMSFORD</option>
+						<option value='62'>CHELSEA</option>
+						<option value='63'>CHESHIRE</option>
+						<option value='64'>CHESTER</option>
+						<option value='65'>CHESTERFIELD</option>
+						<option value='66'>CHICOPEE</option>
+						<option value='67'>CHILMARK</option>
+						<option value='68'>CLARKSBURG</option>
+						<option value='69'>CLINTON</option>
+						<option value='70'>COHASSET</option>
+						<option value='71'>COLRAIN</option>
+						<option value='72'>CONCORD</option>
+						<option value='73'>CONWAY</option>
+						<option value='74'>COTUIT</option>
+						<option value='75'>CUMMINGTON</option>
+						<option value='76'>DALTON</option>
+						<option value='77'>DANVERS</option>
+						<option value='78'>DARTMOUTH</option>
+						<option value='79'>DEDHAM</option>
+						<option value='80'>DEERFIELD</option>
+						<option value='81'>DENNIS</option>
+						<option value='82'>DENNISPORT</option>
+						<option value='83'>DEVENS</option>
+						<option value='83'>DEVENS</option>
+						<option value='83'>DEVENS</option>
+-->
+						<option value='84'>DIGHTON</option>
+<!--
+						<option value='85'>DORCHESTER</option>
+						<option value='86'>DOUGLAS</option>
+						<option value='87'>DOVER</option>
+						<option value='88'>DRACUT</option>
+						<option value='89'>DUDLEY</option>
+						<option value='90'>DUNSTABLE</option>
+						<option value='91'>DUXBURY</option>
+						<option value='92'>EAST BOSTON</option>
+						<option value='93'>EAST BRIDGEWATER</option>
+						<option value='94'>EAST BROOKFIELD</option>
+						<option value='95'>EAST LONGMEADOW</option>
+						<option value='96'>EASTHAM</option>
+						<option value='97'>EASTHAMPTON</option>
+						<option value='98'>EASTON</option>
+						<option value='99'>EDGARTOWN</option>
+						<option value='100'>EGREMONT</option>
+						<option value='101'>ERVING</option>
+						<option value='102'>ESSEX</option>
+						<option value='103'>EVERETT</option>
+						<option value='104'>FAIRHAVEN</option>
+						<option value='105'>FALL RIVER</option>
+						<option value='106'>FALMOUTH</option>
+						<option value='107'>FITCHBURG</option>
+						<option value='108'>FLORENCE</option>
+						<option value='109'>FLORIDA</option>
+						<option value='110'>FOXBOROUGH</option>
+						<option value='111'>FRAMINGHAM</option>
+						<option value='112'>FRANKLIN</option>
+						<option value='113'>FREETOWN</option>
+						<option value='114'>GARDNER</option>
+						<option value='115'>GEORGETOWN</option>
+						<option value='116'>GILL</option>
+						<option value='117'>GLOUCESTER</option>
+						<option value='118'>GOSHEN</option>
+						<option value='119'>GOSNOLD</option>
+						<option value='120'>GRAFTON</option>
+						<option value='121'>GRANBY</option>
+						<option value='122'>GRANVILLE</option>
+						<option value='123'>GREAT BARRINGTON</option>
+						<option value='124'>GREENFIELD</option>
+						<option value='125'>GROTON</option>
+						<option value='126'>GROVELAND</option>
+						<option value='127'>HADLEY</option>
+						<option value='128'>HALIFAX</option>
+						<option value='129'>HAMILTON</option>
+						<option value='130'>HAMPDEN</option>
+						<option value='131'>HANCOCK</option>
+						<option value='132'>HANOVER</option>
+						<option value='133'>HANSON</option>
+						<option value='134'>HARDWICK</option>
+						<option value='135'>HARVARD</option>
+						<option value='136'>HARWICH</option>
+						<option value='137'>HATFIELD</option>
+						<option value='138'>HAVERHILL</option>
+						<option value='139'>HAWLEY</option>
+						<option value='140'>HEATH</option>
+						<option value='141'>HINGHAM</option>
+						<option value='142'>HINSDALE</option>
+						<option value='143'>HOLBROOK</option>
+						<option value='144'>HOLDEN</option>
+						<option value='145'>HOLLAND</option>
+						<option value='146'>HOLLISTON</option>
+						<option value='147'>HOLYOKE</option>
+						<option value='148'>HOPEDALE</option>
+						<option value='149'>HOPKINTON</option>
+						<option value='150'>HUBBARDSTON</option>
+						<option value='151'>HUDSON</option>
+						<option value='152'>HULL</option>
+						<option value='153'>HUNTINGTON</option>
+						<option value='154'>HYANNIS</option>
+						<option value='155'>HYDE PARK</option>
+						<option value='156'>INDIAN ORCHARD</option>
+						<option value='157'>IPSWICH</option>
+						<option value='158'>JAMAICA PLAIN</option>
+						<option value='159'>KINGSTON</option>
+						<option value='160'>LAKEVILLE</option>
+						<option value='161'>LANCASTER</option>
+						<option value='162'>LANESBORO</option>
+						<option value='163'>LAWRENCE</option>
+						<option value='164'>LEE</option>
+						<option value='165'>LEEDS</option>
+						<option value='166'>LEICESTER</option>
+						<option value='167'>LENOX</option>
+						<option value='168'>LEOMINSTER</option>
+						<option value='169'>LEVERETT</option>
+						<option value='170'>LEXINGTON</option>
+						<option value='171'>LEYDEN</option>
+						<option value='172'>LINCOLN</option>
+						<option value='173'>LITTLETON</option>
+						<option value='174'>LONGMEADOW</option>
+						<option value='175'>LOWELL</option>
+						<option value='176'>LUDLOW</option>
+						<option value='177'>LUNENBURG</option>
+						<option value='178'>LYNN</option>
+						<option value='179'>LYNNFIELD</option>
+						<option value='180'>MALDEN</option>
+						<option value='181'>MANCHESTER</option>
+						<option value='182'>MANSFIELD</option>
+						<option value='183'>MARBLEHEAD</option>
+						<option value='184'>MARION</option>
+						<option value='185'>MARLBOROUGH</option>
+						<option value='186'>MARSHFIELD</option>
+						<option value='187'>MARSTONS MILLS</option>
+						<option value='188'>MASHPEE</option>
+						<option value='189'>MATTAPAN</option>
+						<option value='190'>MATTAPOISETT</option>
+						<option value='191'>MAYNARD</option>
+						<option value='192'>MEDFIELD</option>
+						<option value='193'>MEDFORD</option>
+						<option value='194'>MEDWAY</option>
+						<option value='195'>MELROSE</option>
+						<option value='196'>MENDON</option>
+						<option value='197'>MERRIMAC</option>
+						<option value='198'>METHUEN</option>
+						<option value='199'>MIDDLEBORO</option>
+						<option value='200'>MIDDLEFIELD</option>
+						<option value='201'>MIDDLETON</option>
+						<option value='202'>MILFORD</option>
+						<option value='203'>MILLBURY</option>
+						<option value='204'>MILLIS</option>
+						<option value='205'>MILLVILLE</option>
+						<option value='206'>MILTON</option>
+						<option value='207'>MONROE</option>
+						<option value='208'>MONSON</option>
+						<option value='209'>MONTAGUE</option>
+						<option value='210'>MONTEREY</option>
+						<option value='211'>MONTGOMERY</option>
+						<option value='212'>MOUNT WASHINGTON</option>
+						<option value='213'>NAHANT</option>
+						<option value='214'>NANTUCKET</option>
+						<option value='215'>NATICK</option>
+						<option value='216'>NEEDHAM</option>
+						<option value='217'>NEW ASHFORD</option>
+						<option value='218'>NEW BEDFORD</option>
+						<option value='219'>NEW BRAINTREE</option>
+						<option value='220'>NEW MARLBORO</option>
+						<option value='221'>NEW SALEM</option>
+						<option value='222'>NEWBURY</option>
+						<option value='223'>NEWBURYPORT</option>
+						<option value='224'>NEWTON</option>
+						<option value='225'>NORFOLK</option>
+						<option value='226'>NORTH ADAMS</option>
+						<option value='227'>NORTH ANDOVER</option>
+						<option value='228'>NORTH ATTLEBORO</option>
+						<option value='229'>NORTH BROOKFIELD</option>
+						<option value='230'>NORTH READING</option>
+						<option value='231'>NORTHAMPTON</option>
+						<option value='232'>NORTHBOROUGH</option>
+						<option value='233'>NORTHBRIDGE</option>
+						<option value='234'>NORTHFIELD</option>
+						<option value='235'>NORTON</option>
+						<option value='236'>NORWELL</option>
+						<option value='237'>NORWOOD</option>
+						<option value='238'>OAK BLUFFS</option>
+						<option value='239'>OAKHAM</option>
+						<option value='240'>ORANGE</option>
+						<option value='241'>ORLEANS</option>
+						<option value='242'>OSTERVILLE</option>
+						<option value='243'>OTIS</option>
+						<option value='244'>OXFORD</option>
+						<option value='245'>PALMER</option>
+						<option value='246'>PAXTON</option>
+						<option value='247'>PEABODY</option>
+						<option value='248'>PELHAM</option>
+						<option value='249'>PEMBROKE</option>
+						<option value='250'>PEPPERELL</option>
+						<option value='251'>PERU</option>
+						<option value='252'>PETERSHAM</option>
+						<option value='253'>PHILLIPSTON</option>
+						<option value='254'>PITTSFIELD</option>
+						<option value='255'>PLAINFIELD</option>
+						<option value='256'>PLAINVILLE</option>
+						<option value='257'>PLYMOUTH</option>
+						<option value='258'>PLYMPTON</option>
+						<option value='259'>PRINCETON</option>
+						<option value='260'>PROVINCETOWN</option>
+						<option value='261'>QUINCY</option>
+						<option value='262'>RANDOLPH</option>
+						<option value='263'>RAYNHAM</option>
+						<option value='264'>READING</option>
+						<option value='265'>REHOBOTH</option>
+						<option value='266'>REVERE</option>
+						<option value='267'>RICHMOND</option>
+						<option value='268'>ROCHESTER</option>
+						<option value='269'>ROCKLAND</option>
+						<option value='270'>ROCKPORT</option>
+						<option value='271'>ROSLINDALE</option>
+						<option value='272'>ROWE</option>
+						<option value='273'>ROWLEY</option>
+						<option value='274'>ROXBURY</option>
+						<option value='275'>ROYALSTON</option>
+						<option value='276'>RUSSELL</option>
+						<option value='277'>RUTLAND</option>
+						<option value='278'>SALEM</option>
+						<option value='279'>SALISBURY</option>
+						<option value='280'>SANDISFIELD</option>
+						<option value='281'>SANDWICH</option>
+						<option value='282'>SAUGUS</option>
+						<option value='283'>SAVOY</option>
+						<option value='284'>SCITUATE</option>
+						<option value='285'>SEEKONK</option>
+						<option value='286'>SHARON</option>
+						<option value='287'>SHEFFIELD</option>
+						<option value='288'>SHELBURNE</option>
+						<option value='289'>SHERBORN</option>
+						<option value='290'>SHIRLEY</option>
+						<option value='291'>SHREWSBURY</option>
+						<option value='292'>SHUTESBURY</option>
+						<option value='293'>SIASCONSET</option>
+						<option value='294'>SOMERSET</option>
+						<option value='295'>SOMERVILLE</option>
+						<option value='296'>SOUTH BOSTON</option>
+						<option value='380'>SOUTH DEERFIELD</option>
+						<option value='297'>SOUTH DENNIS</option>
+						<option value='298'>SOUTH HADLEY</option>
+						<option value='299'>SOUTHAMPTON</option>
+						<option value='300'>SOUTHBOROUGH</option>
+						<option value='301'>SOUTHBRIDGE</option>
+						<option value='302'>SOUTHWICK</option>
+						<option value='303'>SPENCER</option>
+						<option value='304'>SPRINGFIELD</option>
+						<option value='305'>STERLING</option>
+						<option value='306'>STOCKBRIDGE</option>
+						<option value='307'>STONEHAM</option>
+						<option value='308'>STOUGHTON</option>
+						<option value='309'>STOW</option>
+						<option value='310'>STURBRIDGE</option>
+						<option value='311'>SUDBURY</option>
+						<option value='312'>SUNDERLAND</option>
+						<option value='313'>SUTTON</option>
+						<option value='314'>SWAMPSCOTT</option>
+						<option value='315'>SWANSEA</option>
+-->
+						<option value='316'>TAUNTON</option>
+<!--
+						<option value='317'>TEMPLETON</option>
+						<option value='318'>TEWKSBURY</option>
+						<option value='319'>THORNDIKE</option>
+						<option value='320'>THREE RIVERS</option>
+						<option value='321'>TISBURY</option>
+						<option value='322'>TOLLAND</option>
+						<option value='323'>TOPSFIELD</option>
+						<option value='324'>TOWNSEND</option>
+						<option value='325'>TRURO</option>
+						<option value='326'>TYNGSBORO</option>
+						<option value='327'>TYRINGHAM</option>
+						<option value='328'>UPTON</option>
+						<option value='329'>UXBRIDGE</option>
+						<option value='330'>WAKEFIELD</option>
+						<option value='331'>WALES</option>
+						<option value='332'>WALPOLE</option>
+						<option value='333'>WALTHAM</option>
+						<option value='334'>WARE</option>
+						<option value='335'>WAREHAM</option>
+						<option value='336'>WARREN</option>
+						<option value='337'>WARWICK</option>
+						<option value='338'>WASHINGTON</option>
+						<option value='339'>WATERTOWN</option>
+						<option value='340'>WAYLAND</option>
+						<option value='341'>WEBSTER</option>
+						<option value='342'>WELLESLEY</option>
+						<option value='343'>WELLFLEET</option>
+						<option value='344'>WENDELL</option>
+						<option value='345'>WENHAM</option>
+						<option value='346'>WEST BARNSTABLE</option>
+						<option value='347'>WEST BOYLSTON</option>
+						<option value='348'>WEST BRIDGEWATER</option>
+						<option value='349'>WEST BROOKFIELD</option>
+						<option value='350'>WEST DENNIS</option>
+						<option value='351'>WEST NEWBURY</option>
+						<option value='352'>WEST ROXBURY</option>
+						<option value='353'>WEST SPRINGFIELD</option>
+						<option value='354'>WEST STOCKBRIDGE</option>
+						<option value='355'>WEST TISBURY</option>
+-->
+						<option value='356'>WESTBOROUGH</option>
+						<option value='357'>WESTFIELD</option>
+						<option value='358'>WESTFORD</option>
+						<option value='359'>WESTHAMPTON</option>
+						<option value='360'>WESTMINSTER</option>
+						<option value='361'>WESTON</option>
+						<option value='362'>WESTPORT</option>
+						<option value='363'>WESTWOOD</option>
+						<option value='364'>WEYMOUTH</option>
+						<option value='365'>WHATELY</option>
+						<option value='366'>WHITMAN</option>
+						<option value='367'>WILBRAHAM</option>
+						<option value='368'>WILLIAMSBURG</option>
+						<option value='369'>WILLIAMSTOWN</option>
+						<option value='370'>WILMINGTON</option>
+						<option value='371'>WINCHENDON</option>
+						<option value='372'>WINCHESTER</option>
+						<option value='373'>WINDSOR</option>
+						<option value='374'>WINTHROP</option>
+						<option value='375'>WOBURN</option>
+						<option value='376'>WORCESTER</option>
+						<option value='377'>WORTHINGTON</option>
+						<option value='378'>WRENTHAM</option>
+						<option value='379'>YARMOUTH</option>
+				</select>
+			</div>
+			<input type="button" disabled="disabled" id="settings_syncnow" value="Download Records in Selected Community" /> <br/>
+			<input type="button" id="settings_clear" value="Clear Records from This Device" /> <br/>
+			<input type="button" id="settings_sync_tiles" value="Sync tiles in current map area" /> <br/>
+			<input type="button" id="settings_upload" value="Submit My Updates" /> <br/>
+		</div>
+
+		<div id="login_popup" data-role="popup" class="ui-content" style="padding:20px">
+			<h2>Please provide your email address</h2>
+			<div>
+				<div style="float:left; width:100%">
+					<form id="save_email_form">
+						<input type="text" id="login_username" maxlength="30" data-mini="true" placeholder="email address" />
+					</form>
+				</div>
+			</div>
+			<div style="clear: both">
+				<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" class="ui-btn-right">Cancel</a>
+				<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="check" class="ui-btn-right">OK</a>
+			</div>
+		</div>
+	</div>
+
+	<div id="qunit-fixture"></div>
+	<div style="display:none;" class="modalWindow"></div>
+</body>
+	<script src="http://code.jquery.com/qunit/qunit-1.14.0.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.14.0.css"></link>
+	<script src="js/massgis_mft_test.js"></script>
+
+<script id="linkedAddressesTmpl" type="text/x-jsrender">
+	<li style="background-color: {{>backgroundColor}}" data-id="{{>id}}" class="full_addr">
+		<span
+			title="{{>attributes.FULL_NUMBER_STANDARDIZED}} {{>attributes.STREET_NAME}} {{>attributes.UNIT}} {{>attributes.SITE_NAME}} {{>attributes.BUILDING_NAME}}"
+			style="display: inline-block; box-shadow: none; width:60%; overflow: hidden; white-space: nowrap;">
+			{{>attributes.FULL_NUMBER_STANDARDIZED}} {{>attributes.STREET_NAME}}
+			{{if attributes.BUILDING_NAME}}, B: {{>attributes.BUILDING_NAME}} {{/if}}
+			{{if attributes.UNIT}}, U: {{>attributes.UNIT}} {{/if}}
+			{{if attributes.SITE_NAME}}, S: {{>attributes.SITE_NAME}} {{/if}}
+		</span>
+
+		<span data-type="horizontal" data-role="controlgroup" data-mini="true" data-shadow="true" class="custom-list-aside">
+			<div data-iconpos="notext" data-icon="arrow-d" data-role="button" data-inline="true" data-mini="true" data-fid="{{>fid}}" data-action="click_to_hide"></div>
+			<div data-iconpos="notext" data-icon="mgis-edit" data-role="button" data-inline="true" data-mini="true" data-fid="{{>fid}}" data-action="click_to_edit"></div>
+			<div data-iconpos="notext" data-icon="mgis-copy" data-role="button" data-inline="true" data-mini="true" data-fid="{{>fid}}" data-action="click_to_copy"></div>
+			<div data-iconpos="notext" data-icon="mgis-delete" data-role="button" data-inline="true" data-mini="true" data-fid="{{>fid}}" data-action="click_to_delete"></div>
+		</span>
+	</li>
+</script>
+
+<script id="addressListTmpl" type="text/x-jsrender">
+	{{if attributes.EDIT_STATUS != 'DELETED'}}
+	<li data-fid="{{>fid}}">
+		<span
+		{{if attributes.STATUS_COLOR == 'RED')}}
+		  class="no_address_point_id"
+		{{/if}}
+		>{{>attributes.FULL_NUMBER_STANDARDIZED}} {{>attributes.STREET_NAME}}
+			{{if attributes.BUILDING_NAME}}, B: {{>attributes.BUILDING_NAME}} {{/if}}
+			{{if attributes.UNIT}}, U: {{>attributes.UNIT}} {{/if}}
+			{{if attributes.SITE_NAME}}, S: {{>attributes.SITE_NAME}} {{/if}}</span>
+	</li>
+	{{/if}}
+</script>
+</html>
