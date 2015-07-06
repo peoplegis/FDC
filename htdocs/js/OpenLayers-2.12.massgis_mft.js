@@ -14420,7 +14420,7 @@ OpenLayers.Tile = OpenLayers.Class({
      * <OpenLayers.Layer.Grid>. For example, to be notified of the
      * ``loadend`` event of each tiles:
      * (code)
-     * new OpenLayers.Layer.OSM('osm', 'http://tile.openstreetmap.org/${z}/${x}/${y}.png', {
+     * new OpenLayers.Layer.OSM('osm', 'https://tile.openstreetmap.org/${z}/${x}/${y}.png', {
      *     tileOptions: {
      *         eventListeners: {
      *             'loadend': function(evt) {
@@ -16706,9 +16706,9 @@ OpenLayers.Layer.XYZ = OpenLayers.Class(OpenLayers.Layer.Grid, {
  * 
  * (code)
  *     new OpenLayers.Layer.OSM("OpenCycleMap", 
- *       ["http://a.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png",
- *        "http://b.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png",
- *        "http://c.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png"]); 
+ *       ["https://a.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png",
+ *        "https://b.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png",
+ *        "https://c.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png"]); 
  * (end)
  *
  * Inherits from:
@@ -16738,9 +16738,9 @@ OpenLayers.Layer.OSM = OpenLayers.Class(OpenLayers.Layer.XYZ, {
      * (end)
      */
     url: [
-        'http://a.tile.openstreetmap.org/${z}/${x}/${y}.png',
-        'http://b.tile.openstreetmap.org/${z}/${x}/${y}.png',
-        'http://c.tile.openstreetmap.org/${z}/${x}/${y}.png'
+        'https://a.tile.openstreetmap.org/${z}/${x}/${y}.png',
+        'https://b.tile.openstreetmap.org/${z}/${x}/${y}.png',
+        'https://c.tile.openstreetmap.org/${z}/${x}/${y}.png'
     ],
 
     /**
