@@ -1927,7 +1927,7 @@ MASSGIS.sync_address_points = function() {
 	return $.jsonp(
 		{
 			//url: "http://www.mapsonline.net/geoserver-2.1.1/wfs",
-			url: 'http://giswebservices.massgis.state.ma.us/geoserver/wfs',
+			url: 'https://wsgw.mass.gov/geoserver/wfs',
 			data: {
 				"request" : "getfeature",
 				//"typename" : "massgis:massgis_rockportma_address_pointm",
@@ -1983,7 +1983,7 @@ MASSGIS.sync_maf = function() {
 	return $.jsonp(
 		{
 			//url: "http://www.mapsonline.net/geoserver-2.1.1/wfs",
-			url: "http://giswebservices.massgis.state.ma.us/geoserver/wfs",
+			url: "https://wsgw.mass.gov/geoserver/wfs",
 			dataType: "jsonp",
 			data: {
 				"request" : "getfeature",
@@ -2242,7 +2242,7 @@ MASSGIS.init_map = function() {
 			"layerId" : "streetsOverlay",
 			"layerName" : "MassGIS Streets Overlay",
 			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Base_Streets_with_Labels/MapServer",
-			"url" : "http://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/StreetsBasemap2/MapServer",
+			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/StreetsBasemap2/MapServer",
 			"isBaseLayer" : false
 		});
 	streetsLoaded.done(function() {
@@ -2277,7 +2277,7 @@ MASSGIS.init_map = function() {
 			"layerId" : "mgisOrthosLayer",
 			"layerName" : "MassGIS 2013 Orthos",
 			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Orthos/Orthos_2013_USGS/MapServer",
-			url: "http://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/Orthos/MapServer",
+			url: "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/Orthos/MapServer",
 			"isBaseLayer" : false
 		});
 	orthosLoaded.done(function() {
@@ -2298,7 +2298,7 @@ MASSGIS.init_map = function() {
 			"layerId" : "mgisOrthosStatewideLayer",
 			"layerName" : "MassGIS Statewide BaseMap",
 			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Orthos_DigitalGlobe2011_2012/MapServer",
-			"url" : "http://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/DigitalGlobe_2011_2012/MapServer",
+			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/DigitalGlobe_2011_2012/MapServer",
 			"isBaseLayer" : true
 		});
 	statewideOrthosLoaded.done(function() {
