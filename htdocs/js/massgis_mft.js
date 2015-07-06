@@ -2272,33 +2272,13 @@ MASSGIS.init_map = function() {
 		});
 	});
 
-	var orthosLoaded = MASSGIS.loadAndCacheAGSLayer(
-		{
-			"layerId" : "mgisOrthosLayer",
-			"layerName" : "MassGIS 2013 Orthos",
-			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Orthos/Orthos_2013_USGS/MapServer",
-			url: "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/Orthos/MapServer",
-			"isBaseLayer" : false
-		});
-	orthosLoaded.done(function() {
-		MASSGIS.mgisOrthosLayer.setVisibility(false);
-		MASSGIS.map.events.on({"changebaselayer": function() {
-				if (MASSGIS.map.baseLayer == MASSGIS.mgisOrthosStatewideLayer) {
-					MASSGIS.mgisOrthosLayer.setVisibility(true);
-					MASSGIS.mgisOrthosLayer.setZIndex(8);
-				} else {
-					MASSGIS.mgisOrthosLayer.setVisibility(false);
-				}
-			}
-		});
-	});
-
 	var statewideOrthosLoaded = MASSGIS.loadAndCacheAGSLayer(
 		{
 			"layerId" : "mgisOrthosStatewideLayer",
 			"layerName" : "MassGIS Statewide BaseMap",
 			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Orthos_DigitalGlobe2011_2012/MapServer",
-			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/DigitalGlobe_2011_2012/MapServer",
+			//"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/DigitalGlobe_2011_2012/MapServer",
+                        "url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/USGS_Orthos_2013_2014/MapServer",
 			"isBaseLayer" : true
 		});
 	statewideOrthosLoaded.done(function() {
@@ -2318,7 +2298,7 @@ MASSGIS.init_map = function() {
 	);
 	MASSGIS.map.addLayer(MASSGIS.blankBaseLayer);
 
-	$.when(streetsLoaded,orthosLoaded,statewideOrthosLoaded).then(function() {
+	$.when(streetsLoaded,statewideOrthosLoaded).then(function() {
 		MASSGIS.tilesDB = openDatabase('offline_tiles', '1.0', 'MassGIS Offline Tile Storage', 20 * 1024 * 1024);
 		MASSGIS.tilesDB.transaction(function(tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS tiles (url text unique, datauri text)');
