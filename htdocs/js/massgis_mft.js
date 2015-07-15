@@ -172,7 +172,7 @@ MASSGIS.undoStack = {};
 MASSGIS.username;
 MASSGIS.addressQueryResults = [];
 MASSGIS.mapTypes = ['Road','Hybrid','Blank'];
-MASSGIS.mapType  = MASSGIS.mapTypes[0];
+MASSGIS.mapType = MASSGIS.mapTypes[0];
 
 
 $(document).on("pageinit", function(evt) {
@@ -1508,19 +1508,19 @@ console.log("searching for addrs with address point id " + mafAddr.attributes.AD
 };
 
 MASSGIS.sort_maf_features_by_street = function(obj1, obj2) {
-  var s1_num  = obj1.attributes.FULL_NUMBER_STANDARDIZED.match(/^\d*/)[0];
+  var s1_num = obj1.attributes.FULL_NUMBER_STANDARDIZED.match(/^\d*/)[0];
   var s1_xtra = '';
   if (s1_num != '') {
 	s1_xtra = obj1.attributes.FULL_NUMBER_STANDARDIZED.slice(s1_num.length);
-	s1_num  = s1_num * 1 + 1000000;
+	s1_num = s1_num * 1 + 1000000;
   }
   var s1 = obj1.attributes.STREET_NAME + s1_num + s1_xtra + obj1.attributes.UNIT + obj1.attributes.BUILDING_NAME;
 
-  var s2_num  = obj2.attributes.FULL_NUMBER_STANDARDIZED.match(/^\d*/)[0];
+  var s2_num = obj2.attributes.FULL_NUMBER_STANDARDIZED.match(/^\d*/)[0];
   var s2_xtra = '';
   if (s2_num != '') {
 	s2_xtra = obj2.attributes.FULL_NUMBER_STANDARDIZED.slice(s2_num.length);
-	s2_num  = s2_num * 1 + 1000000;
+	s2_num = s2_num * 1 + 1000000;
   }
   var s2 = obj2.attributes.STREET_NAME + s2_num + s2_xtra + obj2.attributes.UNIT + obj2.attributes.BUILDING_NAME;
 
@@ -1612,7 +1612,7 @@ MASSGIS.init_datastores = function() {
 					return f.attributes.LABEL_TEXT === null ? "" : f.attributes.LABEL_TEXT;
 				},
 				get_display : function(f) {
-					return (f.attributes.STATUS_COLOR == 'NONE' || f.attributes.TYPE_ICON  == 'NONE') ? 'none' : 'visible';
+					return (f.attributes.STATUS_COLOR == 'NONE' || f.attributes.TYPE_ICON == 'NONE') ? 'none' : 'visible';
 				}
 			},
 			rules: [
@@ -2186,7 +2186,7 @@ MASSGIS.loadAndCacheAGSLayerResponse = function(data,opts) {
 	// 		}
 	// 	}
 	// });
-	var customRes =  MASSGIS.osmLayer.resolutions.slice(0).splice(0,20); // MassGIS Orthos are only tiled through level 19, so we'll prevent zooming further;
+	var customRes = MASSGIS.osmLayer.resolutions.slice(0).splice(0,20); // MassGIS Orthos are only tiled through level 19, so we'll prevent zooming further;
 	MASSGIS[opts.layerId] = new OpenLayers.Layer.ArcGISCache( opts.layerName, layerInfo.tileServers, {
 		isBaseLayer: opts.isBaseLayer,
 		resolutions: customRes,
@@ -2234,8 +2234,20 @@ MASSGIS.init_map = function() {
 			}
 		}
 	});
-
 	MASSGIS.map.addLayer(MASSGIS.osmLayer);
+
+	//http://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/MassGISBasemap_Topo_Detailed_L3/MapServer
+	var topoLoaded = MASSGIS.loadAndCacheAGSLayer(
+		{
+			"layerId" : "topoBasemap",
+			"layerName" : "Topo Basemap",
+			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/MassGISBasemap_Topo_Detailed_L3/MapServer",
+			"isBaseLayer" : true
+		});
+	topoLoaded.done(function() {
+		MASSGIS.map.removeLayer(MASSGIS.osmLayer);
+		MASSGIS.map.setBaseLayer(MASSGIS.topoBasemap);
+	});
 
 	var streetsLoaded = MASSGIS.loadAndCacheAGSLayer(
 		{
@@ -2278,7 +2290,7 @@ MASSGIS.init_map = function() {
 			"layerName" : "MassGIS Statewide BaseMap",
 			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Orthos_DigitalGlobe2011_2012/MapServer",
 			//"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/DigitalGlobe_2011_2012/MapServer",
-                        "url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/USGS_Orthos_2013_2014/MapServer",
+			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/USGS_Orthos_2013_2014/MapServer",
 			"isBaseLayer" : true
 		});
 	statewideOrthosLoaded.done(function() {
@@ -2305,7 +2317,7 @@ MASSGIS.init_map = function() {
 		});
 		var cacheRead = new OpenLayers.Control.CacheRead({
 			autoActivate : true,
-			layers : [MASSGIS.osmLayer,MASSGIS.mgisOrthosStatewideLayer,MASSGIS.mgisOrthosLayer,MASSGIS.streetsOverlay]
+			layers : [MASSGIS.osmLayer,MASSGIS.mgisOrthosStatewideLayer,MASSGIS.streetsOverlay]
 			,fetch: function(evt) {
 				if (this.active && window.localStorage && evt.tile instanceof OpenLayers.Tile.Image) {
 					var tile = evt.tile,
@@ -2620,7 +2632,7 @@ MASSGIS.init_map = function() {
 			}
 
 			// Create new address_point_id in MASSGIS-friendly projection coords.
-			var newLonLat  = new OpenLayers.LonLat(clickedPt.lon,clickedPt.lat).transform(
+			var newLonLat = new OpenLayers.LonLat(clickedPt.lon,clickedPt.lat).transform(
 				 MASSGIS.map.getProjectionObject()
 				,new OpenLayers.Projection('EPSG:26986')
 			);
@@ -2703,12 +2715,18 @@ MASSGIS.init_map = function() {
 						var delClone = targetMP.clone();
 						delClone.fid = null;
 						delClone.layer = targetMP.layer;
+						delClone.geometry.components = deletedComponents;
+						var newCentroid = delClone.geometry.getCentroid().clone().transform(
+							 MASSGIS.map.getProjectionObject()
+							,new OpenLayers.Projection('EPSG:26986')
+						);
+						delClone.attributes.ADDRESS_POINT_ID = "M_" + Math.round(newCentroid.x) + "_" + Math.round(newCentroid.y);
 						delClone.attributes.STATUS_COLOR = 'NONE';
 						delClone.attributes.GEOGRAPHIC_EDIT_STATUS = 'DELETED';
 						delClone.attributes.__MODIFIED__ = true;
 						delClone.attributes.TRANSACTION_ID = txId;
 						delClone.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
-						delClone.geometry.components = deletedComponents;
+						
 						delClone.state = OpenLayers.State.INSERT;
 						MASSGIS.lyr_address_points.addFeatures([delClone]);
 						//MASSGIS.lyr_address_points.strategies[1].save();
@@ -2847,7 +2865,8 @@ MASSGIS.init_map = function() {
 	$('#layer_switcher').on('click', function() {
 		MASSGIS.mapType = MASSGIS.mapTypes[(_.indexOf(MASSGIS.mapTypes,MASSGIS.mapType) + 1) % MASSGIS.mapTypes.length];
 		if (MASSGIS.mapType == 'Road') {
-			MASSGIS.map.setBaseLayer(MASSGIS.osmLayer);
+			//MASSGIS.map.setBaseLayer(MASSGIS.osmLayer);
+			MASSGIS.map.setBaseLayer(MASSGIS.topoBasemap);
 			jQuery('.ui-icon.ui-icon-shadow.ui-icon-mft-sattelite').css('background-image','url("img/sattelite_icon.png")');
 			jQuery('#layer_switcher .ui-btn-text').html('aerials');
 		}
