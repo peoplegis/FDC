@@ -1748,13 +1748,20 @@ MASSGIS.check_recs_to_submit = function() {
 	console.log("ADDR_PT submissions", addrSubmit);
 ;}
 
-MASSGIS.submit_maf_records = function(edit_tx_id) {
+MASSGIS.submit_maf_records = function() {
 	//build a list of our modified lyr_maf data
 	var d = new Date();
 	var edit_date = d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2);
 	mafSubmitFeatures = [];
+	var uniqueId = "MA_CHNG_UID_" + MASSGIS.generateTXId();
+	var bSaveChanges = false;
 	$.each(MASSGIS.lyr_maf.features, function(idx, feature) {
 		if (feature.attributes.__MODIFIED__) {
+			if (!feature.attributes.MA_CHNG_UID) {
+				feature.attributes.MA_CHNG_UID = uniqueId;
+				feature.state = OpenLayers.State.UPDATE;
+				bSaveChanges = true;
+			}
 			// insert the a/d/m records
 			var f = feature.clone();
 			f.state = OpenLayers.State.INSERT;
@@ -1773,6 +1780,10 @@ MASSGIS.submit_maf_records = function(edit_tx_id) {
 		}
 	});
 
+	if (bSaveChanges) {
+		MASSGIS.lyr_maf.strategies[1].save();
+	}
+
 	if (mafSubmitFeatures.length === 0) {
 		return false;
 	}
@@ -1785,7 +1796,7 @@ MASSGIS.submit_maf_records = function(edit_tx_id) {
 	var errorCount = 0;
 	var sendUpdates = function() {
 		if (errorCount > 5) {
-			alert('After trying 5 times, the server was unable to accept your updates.  Please contact Michael Warner at (617) 626-4617.');
+			alert('After trying 5 times, the server was unable to accept your Master Address List updates.  Please contact Michael Warner at (617) 626-4617.');
 			MASSGIS.hideModalMessage();
 			return;
 		}
@@ -1812,19 +1823,11 @@ MASSGIS.submit_maf_records = function(edit_tx_id) {
 						if (feature.attributes.__MODIFIED__) {
 							// clean up this record
 							delete feature.attributes.__MODIFIED__;
+							delete feature.attributes.MA_CHNG_UID;
 							feature.state = OpenLayers.State.UPDATE;
 						}
 					});
 					MASSGIS.lyr_maf.strategies[1].save();
-
-					$.each(MASSGIS.lyr_address_points.features, function(idx, feature) {
-						if (feature.attributes.__MODIFIED__) {
-							// clean up this record
-							delete feature.attributes.__MODIFIED__;
-							feature.state = OpenLayers.State.UPDATE;
-						}
-					});
-					MASSGIS.lyr_address_points.strategies[1].save();
 				}
 				// should we clear the data off of the unit now?
 				//$('#settings_clear').click();
@@ -1847,7 +1850,16 @@ MASSGIS.submit_address_points = function() {
 	var d = new Date();
 	var edit_date = d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2);
 	addrSubmitFeatures = [];
+	var uniqueId = "AP_CHNG_UID_" + MASSGIS.generateTXId();
+	var bSaveChanges = false;
 	$.each(MASSGIS.lyr_address_points.features, function(idx, feature) {
+		if (feature.attributes.__MODIFIED__) {
+			if (!feature.attributes.AP_CHNG_UID) {
+				feature.attributes.AP_CHNG_UID = uniqueId;
+				feature.state = OpenLayers.State.UPDATE;
+				bSaveChanges = true;
+			}
+		}
 		if (feature.attributes.__MODIFIED__) {
 			// insert the a/d/m records
 			var f = feature.clone();
@@ -1863,6 +1875,10 @@ MASSGIS.submit_address_points = function() {
 		}
 	});
 
+	if (bSaveChanges) {
+		MASSGIS.lyr_address_points.strategies[1].save();
+	}
+
 	if (addrSubmitFeatures.length === 0) {
 		return;
 	}
@@ -1874,7 +1890,7 @@ MASSGIS.submit_address_points = function() {
 	var errorCount = 0;
 	var sendUpdates = function() {
 		if (errorCount > 5) {
-			alert('After trying 5 times, the server was unable to accept your updates.  Please contact Michael Warner at (617) 626-4617.');
+			alert('After trying 5 times, the server was unable to accept your Address Point updates.  Please contact Michael Warner at (617) 626-4617.');
 			MASSGIS.hideModalMessage();
 			return;
 		}
@@ -1900,6 +1916,7 @@ MASSGIS.submit_address_points = function() {
 						if (feature.attributes.__MODIFIED__) {
 							// clean up this record
 							delete feature.attributes.__MODIFIED__;
+							delete feature.attributes.AP_CHNG_UID;
 							feature.state = OpenLayers.State.UPDATE;
 						}
 					});
@@ -3089,7 +3106,6 @@ MASSGIS.dummyTile = OpenLayers.Class(OpenLayers.Tile, {
 
 MASSGIS.generateTXId = function() {
 	var txId = Math.round(Math.random() * 100000000);
-	console.log(txId);
 	return txId;
 };
 
