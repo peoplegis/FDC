@@ -1753,12 +1753,11 @@ MASSGIS.submit_maf_records = function() {
 	var d = new Date();
 	var edit_date = d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2);
 	mafSubmitFeatures = [];
-	var uniqueId = "MA_CHNG_UID_" + MASSGIS.generateTXId();
 	var bSaveChanges = false;
 	$.each(MASSGIS.lyr_maf.features, function(idx, feature) {
 		if (feature.attributes.__MODIFIED__) {
 			if (!feature.attributes.MA_CHNG_UID) {
-				feature.attributes.MA_CHNG_UID = uniqueId;
+				feature.attributes.MA_CHNG_UID = "MA_CHNG_UID_" + MASSGIS.generateTXId();
 				feature.state = OpenLayers.State.UPDATE;
 				bSaveChanges = true;
 			}
@@ -1850,12 +1849,11 @@ MASSGIS.submit_address_points = function() {
 	var d = new Date();
 	var edit_date = d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2);
 	addrSubmitFeatures = [];
-	var uniqueId = "AP_CHNG_UID_" + MASSGIS.generateTXId();
 	var bSaveChanges = false;
 	$.each(MASSGIS.lyr_address_points.features, function(idx, feature) {
 		if (feature.attributes.__MODIFIED__) {
 			if (!feature.attributes.AP_CHNG_UID) {
-				feature.attributes.AP_CHNG_UID = uniqueId;
+				feature.attributes.AP_CHNG_UID = "AP_CHNG_UID_" + MASSGIS.generateTXId();
 				feature.state = OpenLayers.State.UPDATE;
 				bSaveChanges = true;
 			}
