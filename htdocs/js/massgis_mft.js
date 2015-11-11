@@ -1757,7 +1757,8 @@ MASSGIS.submit_maf_records = function() {
 	$.each(MASSGIS.lyr_maf.features, function(idx, feature) {
 		if (feature.attributes.__MODIFIED__) {
 			if (!feature.attributes.MA_CHNG_UID) {
-				feature.attributes.MA_CHNG_UID = "MA_CHNG_UID_" + MASSGIS.generateTXId();
+				//feature.attributes.MA_CHNG_UID = "MA_CHNG_UID_" + MASSGIS.generateTXId();
+				feature.attributes.MA_CHNG_UID = feature.attributes.TRANSACTION_ID + "_" + MASSGIS.generateTXId();
 				feature.state = OpenLayers.State.UPDATE;
 				bSaveChanges = true;
 			}
@@ -1853,7 +1854,8 @@ MASSGIS.submit_address_points = function() {
 	$.each(MASSGIS.lyr_address_points.features, function(idx, feature) {
 		if (feature.attributes.__MODIFIED__) {
 			if (!feature.attributes.AP_CHNG_UID) {
-				feature.attributes.AP_CHNG_UID = "AP_CHNG_UID_" + MASSGIS.generateTXId();
+				//feature.attributes.AP_CHNG_UID = "AP_CHNG_UID_" + MASSGIS.generateTXId();
+				feature.attributes.AP_CHNG_UID = feature.attributes.TRANSACTION_ID + "_" + MASSGIS.generateTXId();
 				feature.state = OpenLayers.State.UPDATE;
 				bSaveChanges = true;
 			}
@@ -2845,7 +2847,7 @@ MASSGIS.init_map = function() {
 							targetMP.attributes.GEOGRAPHIC_EDIT_STATUS = 'UNLINKED';
 							targetMP.attributes.STATUS_COLOR = 'GRAY';
 							targetMP.attributes.TRANSACTION_ID = txId;
-							targetMp.attributes.STRUCTURE_STATUS = 'S';
+							targetMP.attributes.STRUCTURE_STATUS = 'S';
 							targetMP.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
 							targetMP.attributes.__MODIFIED__ = true;
 							targetMP.state = OpenLayers.State.UPDATE;
@@ -2899,7 +2901,7 @@ MASSGIS.init_map = function() {
 					}
 					targetMP.layer && targetMP.layer.strategies && targetMP.layer.strategies[1].save();
 					targetMP.layer && targetMP.layer.redraw();
-					targetMP.layer.spatialIndex && targetMP.layer.reindex();
+					targetMP.layer && targetMP.layer.spatialIndex && targetMP.layer.reindex();
 				});
 			});
 		} else {
@@ -3103,7 +3105,7 @@ MASSGIS.dummyTile = OpenLayers.Class(OpenLayers.Tile, {
 });
 
 MASSGIS.generateTXId = function() {
-	var txId = Math.round(Math.random() * 100000000);
+	var txId = Math.round(Math.random() * 1000000000);
 	return txId;
 };
 
