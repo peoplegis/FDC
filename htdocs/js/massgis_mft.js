@@ -2705,6 +2705,7 @@ MASSGIS.init_map = function() {
 			// Per discussion on 9/4, newly added points without connected addresses *should* be sent to server
 			// if this is not desired, comment out next line
 			newFeature.attributes.__MODIFIED__ = true;
+			newFeature.state = OpenLayers.State.INSERT;
 
 			MASSGIS.lyr_address_points.addFeatures([newFeature]);
 			MASSGIS.lyr_address_points.strategies[1].save();
