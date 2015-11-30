@@ -1796,7 +1796,7 @@ MASSGIS.submit_maf_records = function() {
 	var errorCount = 0;
 	var sendUpdates = function() {
 		if (errorCount > 5) {
-			alert('After trying 5 times, the server was unable to accept your Master Address List updates.  Please contact Michael Warner at (617) 626-4617.');
+			alert('After trying 5 times, the server was unable to accept your Master Address List updates.  Please contact Sienna Svob at sienna.svob@state.ma.us or (617) 388-5723.');
 			MASSGIS.hideModalMessage();
 			return;
 		}
@@ -1890,7 +1890,7 @@ MASSGIS.submit_address_points = function() {
 	var errorCount = 0;
 	var sendUpdates = function() {
 		if (errorCount > 5) {
-			alert('After trying 5 times, the server was unable to accept your Address Point updates.  Please contact Michael Warner at (617) 626-4617.');
+			alert('After trying 5 times, the server was unable to accept your Address Point updates.  Please contact Sienna Svob at sienna.svob@state.ma.us or (617) 388-5723.');
 			MASSGIS.hideModalMessage();
 			return;
 		}
