@@ -2697,7 +2697,23 @@ MASSGIS.init_map = function() {
 			newFeature.attributes.STRUCTURE_TYPE = "M";
 			newFeature.attributes.TYPE_ICON = "CIRCLE";
 			newFeature.attributes.LABEL_TEXT = "";
-			newFeature.attributes.COMMUNITY_ID = $('#msag_community').val();
+			var communityId = $('#msag_community').val();
+			if (!communityId || communityId == '') {
+				if (!MASSGIS.lyr_address_points.features) {
+					communityId = -1;
+				} else {
+					communityId = MASSGIS.lyr_address_points.features[0].attributes.COMMUNITY_ID;
+				}
+				if (!communityId || communityId == '') {
+					communityId = -1;
+				}
+			}
+			if (communityId == -1) {
+				alert("Unable to locate an MSAG COMMUNITY_ID for your new address point.  The COMMUNITY_ID will be assigned after the point is added to the database.");
+			}
+
+			//newFeature.attributes.COMMUNITY_ID = $('#msag_community').val();
+			newFeature.attributes.COMMUNITY_ID = communityId;
 			newFeature.attributes.POINT_TYPE = "ABC";
 			newFeature.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
 			//newFeature.attributes.GEOGRAPHIC_TOWN_ID = MASSGIS.lyr_address_points.features[0].attributes.GEOGRAPHIC_TOWN_ID;
