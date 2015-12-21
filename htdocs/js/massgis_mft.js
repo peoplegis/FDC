@@ -1098,6 +1098,9 @@ setTimeout(function() {
 
 	$('#linked_addrs').on("click",'div[data-action="click_to_delete"]',function(e) {
 		e.stopPropagation();
+		if (!confirm("Are you sure you want to delete this address record?")) {
+			return;
+		}
 		// remove from linked addrs
 		var f = MASSGIS.linkedAddressLayer.getFeatureByFid($(this).data('fid'));
 		MASSGIS.linkedAddressLayer.removeFeatures([f]);
