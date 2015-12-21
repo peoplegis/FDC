@@ -2270,34 +2270,34 @@ MASSGIS.init_map = function() {
 	});
 
 
-        var townsLoaded = MASSGIS.loadAndCacheAGSLayer(
+        var msagLoaded = MASSGIS.loadAndCacheAGSLayer(
                 {
-                        "layerId" : "townsOverlay",
-                        "layerName" : "MassGIS Towns Overlay",
-                        "url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/Mass_Towns_Yellow_Lines_and_Labels/MapServer",
+                        "layerId" : "msagOverlay",
+                        "layerName" : "MassGIS MSAG Overlay",
+                        "url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/MSAG_Communities/MapServer",
                         "isBaseLayer" : false
                 });
-        townsLoaded.done(function() {
-                MASSGIS.townsOverlay.setVisibility(false);
+        msagLoaded.done(function() {
+                MASSGIS.msagOverlay.setVisibility(false);
                 MASSGIS.map.events.on({
                         "changebaselayer": function() {
                                 if (MASSGIS.map.baseLayer == MASSGIS.mgisOrthosStatewideLayer) {
                                         if (MASSGIS.map.getZoom() <= 12) {
-                                                MASSGIS.townsOverlay.setVisibility(false);
+                                                MASSGIS.msagOverlay.setVisibility(false);
                                         } else {
-                                                MASSGIS.townsOverlay.setVisibility(true);
+                                                MASSGIS.msagOverlay.setVisibility(true);
                                         }
-                                        MASSGIS.townsOverlay.setZIndex(10);
+                                        MASSGIS.msagOverlay.setZIndex(10);
                                 } else {
-                                        MASSGIS.townsOverlay.setVisibility(false);
+                                        MASSGIS.msagOverlay.setVisibility(false);
                                 }
                         },
                         "zoomend" : function() {
                                 if (MASSGIS.map.baseLayer == MASSGIS.mgisOrthosStatewideLayer) {
                                         if (MASSGIS.map.getZoom() <= 12) {
-                                                MASSGIS.townsOverlay.setVisibility(false);
+                                                MASSGIS.msagOverlay.setVisibility(false);
                                         } else {
-                                                MASSGIS.townsOverlay.setVisibility(true);
+                                                MASSGIS.msagOverlay.setVisibility(true);
                                         }
                                 }
                         }
@@ -2365,7 +2365,7 @@ MASSGIS.init_map = function() {
 	);
 	MASSGIS.map.addLayer(MASSGIS.blankBaseLayer);
 
-	$.when(townsLoaded,streetsLoaded,statewideOrthosLoaded).then(function() {
+	$.when(msagLoaded,streetsLoaded,statewideOrthosLoaded).then(function() {
 		MASSGIS.tilesDB = openDatabase('offline_tiles', '1.0', 'MassGIS Offline Tile Storage', 20 * 1024 * 1024);
 		MASSGIS.tilesDB.transaction(function(tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS tiles (url text unique, datauri text)');
