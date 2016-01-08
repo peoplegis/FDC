@@ -1098,75 +1098,88 @@ setTimeout(function() {
 
 	$('#linked_addrs').on("click",'div[data-action="click_to_delete"]',function(e) {
 		e.stopPropagation();
-		if (!confirm("Are you sure you want to delete this address record?")) {
-			return;
-		}
-		// remove from linked addrs
-		var f = MASSGIS.linkedAddressLayer.getFeatureByFid($(this).data('fid'));
-		MASSGIS.linkedAddressLayer.removeFeatures([f]);
+		var that = this;
+		$('#confirm_address_delete_popup').popup().popup("open");
+		$('#confirm_address_delete_popup a[data-icon=back]').on("click",function(e) {
+			e.stopPropagation();
+			$('#confirm_address_delete_popup a[data-icon=delete]').off("click");
+			$('#confirm_address_delete_popup a[data-icon=back]').off("click");
 
-		// remove address_point_id reference from MAF
-		MASSGIS.undoStack = {
-			"action"			: 'click_to_delete',
-			"ADDRESS_POINT_ID"	: f.attributes.ADDRESS_POINT_ID,
-			"EDIT_STATUS"		: f.attributes.EDIT_STATUS,
-			"STATUS_COLOR"		: f.attributes.STATUS_COLOR
-		};
+			$('#confirm_address_delete_popup').popup().popup("close");
+		});
+
+		$('#confirm_address_delete_popup a[data-icon=delete]').on("click",function(e) {
+			e.stopPropagation();
+			$('#confirm_address_delete_popup a[data-icon=delete]').off("click");
+			$('#confirm_address_delete_popup a[data-icon=back]').off("click");
+
+			// remove from linked addrs
+			var f = MASSGIS.linkedAddressLayer.getFeatureByFid($(that).data('fid'));
+			MASSGIS.linkedAddressLayer.removeFeatures([f]);
+
+			// remove address_point_id reference from MAF
+			MASSGIS.undoStack = {
+				"action"			: 'click_to_delete',
+				"ADDRESS_POINT_ID"	: f.attributes.ADDRESS_POINT_ID,
+				"EDIT_STATUS"		: f.attributes.EDIT_STATUS,
+				"STATUS_COLOR"		: f.attributes.STATUS_COLOR
+			};
 
 
-		var txId = MASSGIS.generateTXId();
+			var txId = MASSGIS.generateTXId();
 
-		// get the lyr_maf version of this feature
-		if (f.attributes.MASTER_ADDRESS_ID == 0) {
-			// this isn't a point that the server even knows about yet.  No need to retain it going forward
-			f = MASSGIS.lyr_maf.getFeatureByFid(f.fid);
-			f.state = OpenLayers.State.DELETE;
-			MASSGIS.undoStack.f = f;
-		} else {
-			f = MASSGIS.lyr_maf.getFeaturesByAttribute('MASTER_ADDRESS_ID',f.attributes.MASTER_ADDRESS_ID)[0];
-			MASSGIS.undoStack.f = f;
-			//EDIT_STATUS changes
-			//f.attributes.EDIT_STATUS = 'DELETED';
-			f.attributes.ADDRESS_STATUS = 'DELETED';
-			// leave a "null" ADDRESS_POINT_ID as null, but tack "_D" onto any legit addrptids
-			f.attributes.ADDRESS_POINT_ID = f.attributes.ADDRESS_POINT_ID ? f.attributes.ADDRESS_POINT_ID + "_D" : f.attributes.ADDRESS_POINT_ID;
-			f.attributes.STATUS_COLOR = 'NONE';
-			f.attributes.TRANSACTION_ID = txId;
-			f.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
-			f.state = OpenLayers.State.UPDATE;
-			f.attributes.__MODIFIED__ = true;
-		}
-
-		MASSGIS.renderLinkedAddresses();
-		MASSGIS.renderAddressList();
-		MASSGIS.lyr_maf.strategies[1].save();
-		MASSGIS.lyr_maf.reindex();
-
-		if (!f.attributes.ADDRESS_POINT_ID) {
-			return;
-		}
-
-		// we also need to mark a potentially affected address point as red, if it were orphaned
-		addrPts = MASSGIS.lyr_address_points.getFeaturesByAttribute('ADDRESS_POINT_ID',MASSGIS.undoStack.ADDRESS_POINT_ID);
-		if (addrPts.length > 0) {
-			siblingMadRecs = MASSGIS.lyr_maf.getFeaturesByAttribute('ADDRESS_POINT_ID',MASSGIS.undoStack.ADDRESS_POINT_ID);
-			if (siblingMadRecs.length === 0) {
-				MASSGIS.undoStack.address_point = {
-					"STATUS_COLOR" :	addrPts[0].attributes.STATUS_COLOR,
-					"ADDRESS_STATUS" :	addrPts[0].attributes.ADDRESS_STATUS
-				};
-				addrPts[0].state = OpenLayers.State.UPDATE;
-				addrPts[0].attributes.__MODIFIED__ = true;
-				addrPts[0].attributes.STATUS_COLOR = "RED";
-				addrPts[0].attributes.ADDRESS_STATUS = "UNLINKED";
-				addrPts[0].attributes.LABEL_TEXT = MASSGIS.lyr_address_points.draw_linked_st_num(addrPts[0]);
-				addrPts[0].attributes.TRANSACTION_ID = txId;
-				addrPts[0].attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
-				MASSGIS.lyr_address_points.strategies[1].save();
-				MASSGIS.lyr_address_points.reindex();
-				MASSGIS.lyr_address_points.redraw();
+			// get the lyr_maf version of this feature
+			if (f.attributes.MASTER_ADDRESS_ID == 0) {
+				// this isn't a point that the server even knows about yet.  No need to retain it going forward
+				f = MASSGIS.lyr_maf.getFeatureByFid(f.fid);
+				f.state = OpenLayers.State.DELETE;
+				MASSGIS.undoStack.f = f;
+			} else {
+				f = MASSGIS.lyr_maf.getFeaturesByAttribute('MASTER_ADDRESS_ID',f.attributes.MASTER_ADDRESS_ID)[0];
+				MASSGIS.undoStack.f = f;
+				//EDIT_STATUS changes
+				//f.attributes.EDIT_STATUS = 'DELETED';
+				f.attributes.ADDRESS_STATUS = 'DELETED';
+				// leave a "null" ADDRESS_POINT_ID as null, but tack "_D" onto any legit addrptids
+				f.attributes.ADDRESS_POINT_ID = f.attributes.ADDRESS_POINT_ID ? f.attributes.ADDRESS_POINT_ID + "_D" : f.attributes.ADDRESS_POINT_ID;
+				f.attributes.STATUS_COLOR = 'NONE';
+				f.attributes.TRANSACTION_ID = txId;
+				f.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+				f.state = OpenLayers.State.UPDATE;
+				f.attributes.__MODIFIED__ = true;
 			}
-		}
+
+			MASSGIS.renderLinkedAddresses();
+			MASSGIS.renderAddressList();
+			MASSGIS.lyr_maf.strategies[1].save();
+			MASSGIS.lyr_maf.reindex();
+
+			if (!f.attributes.ADDRESS_POINT_ID) {
+				return;
+			}
+
+			// we also need to mark a potentially affected address point as red, if it were orphaned
+			addrPts = MASSGIS.lyr_address_points.getFeaturesByAttribute('ADDRESS_POINT_ID',MASSGIS.undoStack.ADDRESS_POINT_ID);
+			if (addrPts.length > 0) {
+				siblingMadRecs = MASSGIS.lyr_maf.getFeaturesByAttribute('ADDRESS_POINT_ID',MASSGIS.undoStack.ADDRESS_POINT_ID);
+				if (siblingMadRecs.length === 0) {
+					MASSGIS.undoStack.address_point = {
+						"STATUS_COLOR" :	addrPts[0].attributes.STATUS_COLOR,
+						"ADDRESS_STATUS" :	addrPts[0].attributes.ADDRESS_STATUS
+					};
+					addrPts[0].state = OpenLayers.State.UPDATE;
+					addrPts[0].attributes.__MODIFIED__ = true;
+					addrPts[0].attributes.STATUS_COLOR = "RED";
+					addrPts[0].attributes.ADDRESS_STATUS = "UNLINKED";
+					addrPts[0].attributes.LABEL_TEXT = MASSGIS.lyr_address_points.draw_linked_st_num(addrPts[0]);
+					addrPts[0].attributes.TRANSACTION_ID = txId;
+					addrPts[0].attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+					MASSGIS.lyr_address_points.strategies[1].save();
+					MASSGIS.lyr_address_points.reindex();
+					MASSGIS.lyr_address_points.redraw();
+				}
+			}
+		});
 	});
 
 	$('#linked_addrs_buttons #add_addr_button').on("click", function() {
