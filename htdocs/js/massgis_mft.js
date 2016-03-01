@@ -1331,7 +1331,9 @@ setTimeout(function() {
 					$.each(others, function(idx, feature) {
 						feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
 						feature.attributes.SITE_NAME_ID = newSiteNameId;
-						feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
+							feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						}
 						feature.attributes.TRANSACTION_ID = txId;
 						feature.attributes.TIME_STAMP = timestamp;
 						feature.state = OpenLayers.State.UPDATE;
@@ -1345,7 +1347,9 @@ setTimeout(function() {
 				$.each(others, function(idx, feature) {
 					feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
 					feature.attributes.SITE_NAME_ID = newSiteNameId;
-					feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+					if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
+						feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+					}
 					feature.attributes.TRANSACTION_ID = txId;
 					feature.attributes.TIME_STAMP = timestamp;
 					feature.state = OpenLayers.State.UPDATE;
@@ -1371,7 +1375,9 @@ setTimeout(function() {
 					$.each(others, function(idx, feature) {
 						feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
 						newSiteNameId !== false && (feature.attributes.SITE_NAME_ID = newSiteNameId);
-						feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
+							feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						}
 						feature.attributes.TRANSACTION_ID = txId;
 						feature.attributes.TIME_STAMP = timestamp;
 						feature.state = OpenLayers.State.UPDATE;
@@ -1386,7 +1392,9 @@ setTimeout(function() {
 					$.each(others, function(idx, feature) {
 						feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
 						newSiteNameId !== false && (feature.attributes.SITE_NAME_ID = newSiteNameId);
-						feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
+							feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						}
 						feature.attributes.TRANSACTION_ID = txId;
 						feature.attributes.TIME_STAMP = timestamp;
 						feature.state = OpenLayers.State.UPDATE;
@@ -1401,7 +1409,9 @@ setTimeout(function() {
 				$.each(others, function(idx, feature) {
 					feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
 					newSiteNameId !== false && (feature.attributes.SITE_NAME_ID = newSiteNameId);
-					feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+					if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
+						feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+					}
 					feature.attributes.TRANSACTION_ID = txId;
 					feature.attributes.TIME_STAMP = timestamp;
 					feature.state = OpenLayers.State.UPDATE;
@@ -1805,8 +1815,8 @@ MASSGIS.submit_maf_records = function() {
 	}
 
 
-	MASSGIS.wfstTransactionStr = MASSGIS.mafWriter.write(mafSubmitFeatures, { 'filterGenerator' : MASSGIS.wfstFilterGenerator });
-	console.log(MASSGIS.wfstTransactionStr);
+	var maf_wfstTransactionStr = MASSGIS.mafWriter.write(mafSubmitFeatures, { 'filterGenerator' : MASSGIS.wfstFilterGenerator });
+	console.log(maf_wfstTransactionStr);
 
 	MASSGIS.showModalMessage('Syncing Address Data to Server',true);
 	var errorCount = 0;
@@ -1821,7 +1831,7 @@ MASSGIS.submit_maf_records = function() {
 			url: MASSGIS.proxy,
 			//url: "/fdc/dummy_response.php",
 			contentType: "text/xml",
-			data: MASSGIS.wfstTransactionStr,
+			data: maf_wfstTransactionStr,
 			dataType: "xml",
 			processData: false,
 			success: function( response ) {
@@ -1899,8 +1909,8 @@ MASSGIS.submit_address_points = function() {
 		return;
 	}
 
-	MASSGIS.wfstTransactionStr = MASSGIS.addrptsWriter.write(addrSubmitFeatures, { 'filterGenerator' : MASSGIS.wfstFilterGenerator });
-	console.log(MASSGIS.wfstTransactionStr);
+	var addr_wfstTransactionStr = MASSGIS.addrptsWriter.write(addrSubmitFeatures, { 'filterGenerator' : MASSGIS.wfstFilterGenerator });
+	console.log(addr_wfstTransactionStr);
 
 	MASSGIS.showModalMessage('Syncing Address Data to Server',true);
 	var errorCount = 0;
@@ -1915,7 +1925,7 @@ MASSGIS.submit_address_points = function() {
 			url: MASSGIS.proxy,
 			//url: "/fdc/dummy_response.php",
 			contentType: "text/xml",
-			data: MASSGIS.wfstTransactionStr,
+			data: addr_wfstTransactionStr,
 			dataType: "xml",
 			processData: false,
 			success: function( response ) {
