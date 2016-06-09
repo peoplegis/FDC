@@ -2279,6 +2279,7 @@ MASSGIS.init_map = function() {
 	});
 	MASSGIS.map.addLayer(MASSGIS.osmLayer);
 
+
 	//http://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/MassGISBasemap_Topo_Detailed_L3/MapServer
 	var topoLoaded = MASSGIS.loadAndCacheAGSLayer(
 		{
@@ -2290,42 +2291,43 @@ MASSGIS.init_map = function() {
 	topoLoaded.done(function() {
 		MASSGIS.map.removeLayer(MASSGIS.osmLayer);
 		MASSGIS.map.setBaseLayer(MASSGIS.topoBasemap);
+		
 	});
 
 
-        var msagLoaded = MASSGIS.loadAndCacheAGSLayer(
-                {
-                        "layerId" : "msagOverlay",
-                        "layerName" : "MassGIS MSAG Overlay",
-                        "url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/MSAG_Communities/MapServer",
-                        "isBaseLayer" : false
-                });
-        msagLoaded.done(function() {
-                MASSGIS.msagOverlay.setVisibility(false);
-                MASSGIS.map.events.on({
-                        "changebaselayer": function() {
-                                if (MASSGIS.map.baseLayer == MASSGIS.mgisOrthosStatewideLayer) {
-                                        if (MASSGIS.map.getZoom() <= 12) {
-                                                MASSGIS.msagOverlay.setVisibility(false);
-                                        } else {
-                                                MASSGIS.msagOverlay.setVisibility(true);
-                                        }
-                                        MASSGIS.msagOverlay.setZIndex(10);
-                                } else {
-                                        MASSGIS.msagOverlay.setVisibility(false);
-                                }
-                        },
-                        "zoomend" : function() {
-                                if (MASSGIS.map.baseLayer == MASSGIS.mgisOrthosStatewideLayer) {
-                                        if (MASSGIS.map.getZoom() <= 12) {
-                                                MASSGIS.msagOverlay.setVisibility(false);
-                                        } else {
-                                                MASSGIS.msagOverlay.setVisibility(true);
-                                        }
-                                }
-                        }
-                });
-        });
+	var msagLoaded = MASSGIS.loadAndCacheAGSLayer(
+		{
+			"layerId" : "msagOverlay",
+			"layerName" : "MassGIS MSAG Overlay",
+			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/MSAG_Communities/MapServer",
+			"isBaseLayer" : false
+		});
+	msagLoaded.done(function() {
+		MASSGIS.msagOverlay.setVisibility(false);
+		MASSGIS.map.events.on({
+			"changebaselayer": function() {
+				if (MASSGIS.map.baseLayer == MASSGIS.mgisOrthosStatewideLayer) {
+					if (MASSGIS.map.getZoom() <= 12) {
+						MASSGIS.msagOverlay.setVisibility(false);
+					} else {
+						MASSGIS.msagOverlay.setVisibility(true);
+					}
+					MASSGIS.msagOverlay.setZIndex(10);
+				} else {
+					MASSGIS.msagOverlay.setVisibility(false);
+				}
+			},
+			"zoomend" : function() {
+				if (MASSGIS.map.baseLayer == MASSGIS.mgisOrthosStatewideLayer) {
+					if (MASSGIS.map.getZoom() <= 12) {
+						MASSGIS.msagOverlay.setVisibility(false);
+					} else {
+						MASSGIS.msagOverlay.setVisibility(true);
+					}
+				}
+			}
+		});
+	});
 
 	var streetsLoaded = MASSGIS.loadAndCacheAGSLayer(
 		{
@@ -2362,18 +2364,32 @@ MASSGIS.init_map = function() {
 		});
 	});
 
-	var statewideOrthosLoaded = MASSGIS.loadAndCacheAGSLayer(
-		{
-			"layerId" : "mgisOrthosStatewideLayer",
-			"layerName" : "MassGIS Statewide BaseMap",
-			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Orthos_DigitalGlobe2011_2012/MapServer",
-			//"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/DigitalGlobe_2011_2012/MapServer",
-			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/USGS_Orthos_2013_2014/MapServer",
-			"isBaseLayer" : true
+	// var statewideOrthosLoaded = MASSGIS.loadAndCacheAGSLayer(
+	// 	{
+	// 		"layerId" : "mgisOrthosStatewideLayer",
+	// 		"layerName" : "MassGIS Statewide BaseMap",
+	// 		//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Orthos_DigitalGlobe2011_2012/MapServer",
+	// 		//"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/DigitalGlobe_2011_2012/MapServer",
+	// 		"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/USGS_Orthos_2013_2014/MapServer",
+	// 		"isBaseLayer" : true
+	// 	});
+	// statewideOrthosLoaded.done(function() {
+	// 	MASSGIS.mgisOrthosStatewideLayer.setZIndex(6);
+	// });
+	var statewideOrthosLoaded = $.Deferred();
+	(function() {
+		$.ajax(
+			//{"url" : "https://orthos.massgis.state.ma.us/login/path/aladdin-eagle-people-holiday/wmts/1.0.0/WMTSCapabilities.xml"}
+			{"url" : "WMTSCapabilities.xml"}
+		).done(function(data, status, xhr) {
+			var w = new OpenLayers.Format.WMTSCapabilities();
+			var cap = w.read(data);
+			MASSGIS.mgisOrthosStatewideLayer = w.createLayer(cap,{"layer":"imagery"});
+			MASSGIS.map.addLayer(MASSGIS.mgisOrthosStatewideLayer);
+			MASSGIS.mgisOrthosStatewideLayer.setZIndex(6);
+			statewideOrthosLoaded.resolve();
 		});
-	statewideOrthosLoaded.done(function() {
-		MASSGIS.mgisOrthosStatewideLayer.setZIndex(6);
-	});
+	})();
 
 	MASSGIS.blankBaseLayer = new OpenLayers.Layer.WMS("Blank",
 		'img/white.png',
@@ -2431,7 +2447,7 @@ MASSGIS.init_map = function() {
 				}
 			}
 		});
-		MASSGIS.map.addControl(cacheRead);
+		//MASSGIS.map.addControl(cacheRead);
 
 		MASSGIS.cacheWrite = new OpenLayers.Control.CacheWrite({
 			autoActivate: true,
@@ -2476,7 +2492,7 @@ MASSGIS.init_map = function() {
 				}
 			}
 		});
-		MASSGIS.map.addControl(MASSGIS.cacheWrite);
+		//MASSGIS.map.addControl(MASSGIS.cacheWrite);
 	});
 
 	// Could be implemented much cheaper as a straight-up object/list
