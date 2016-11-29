@@ -2342,8 +2342,9 @@ MASSGIS.init_map = function() {
 		{
 			"layerId" : "streetsOverlay",
 			"layerName" : "MassGIS Streets Overlay",
-			"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Base_Streets_with_Labels/MapServer",
+			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Base_Streets_with_Labels/MapServer",
 			//"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/StreetsBasemap2/MapServer",
+			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/Base_Streets_with_Labels/MapServer"
 			"isBaseLayer" : false,
 			"numZoomLevels" : 20
 		});
