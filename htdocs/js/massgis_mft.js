@@ -2231,7 +2231,7 @@ MASSGIS.loadAndCacheAGSLayerResponse = function(data,opts) {
 	// });
 	var customRes = MASSGIS.osmLayer.resolutions.slice(0).splice(0,20); // MassGIS layers are tiled through level 19, but osm only gives resolutions to level 18
 	opts.numZoomLevels && opts.numZoomLevels > 19 && customRes.push(0.2); // this gives the extra resolution level we need
-	MASSGIS[opts.layerId] = new OpenLayers.Layer.ArcGISCache( opts.layerName, layerInfo.tileServers, {
+	MASSGIS[opts.layerId] = new OpenLayers.Layer.ArcGISCache( opts.layerName, [opts.url], {
 		isBaseLayer: opts.isBaseLayer,
 		resolutions: customRes,
 		numZoomLevels : opts.numZoomLevels || 19,
@@ -2344,7 +2344,7 @@ MASSGIS.init_map = function() {
 			"layerName" : "MassGIS Streets Overlay",
 			//"url" : "http://gisprpxy.itd.state.ma.us/arcgisserver/rest/services/Basemaps/Base_Streets_with_Labels/MapServer",
 			//"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/StreetsBasemap2/MapServer",
-			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/Base_Streets_with_Labels/MapServer"
+			"url" : "https://tiles.arcgis.com/tiles/hGdibHYSPO59RG1h/arcgis/rest/services/Base_Streets_with_Labels/MapServer",
 			"isBaseLayer" : false,
 			"numZoomLevels" : 20
 		});
