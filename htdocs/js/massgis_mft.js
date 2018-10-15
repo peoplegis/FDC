@@ -286,7 +286,7 @@ MASSGIS.init_ui = function() {
 					if (!addrsByDistance[d]) {
 						addrsByDistance[d] = [];
 					}
-					addrsByDistance[d].push(mpt.attributes.ADDRESS_POINT_ID);
+					addrsByDistance[d].push(mpt.attributes.address_point_id);
 				}
 			});
 		}
@@ -303,9 +303,9 @@ MASSGIS.init_ui = function() {
 		for (var i = 0; i < distances.length; i++) {
 			var a = addrsByDistance[distances[i]];
 			for (var j = 0; j < a.length; j++) {
-				var f = MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",a[j]);
+				var f = MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",a[j]);
 				for (var j = 0; j < f.length; j++) {
-					if (f[j].attributes.ADDRESS_STATUS == 'DELETED') {
+					if (f[j].attributes.address_status == 'DELETED') {
 						continue;
 					}
 					sortedAddrsByDistance.push(f[j]);
@@ -335,7 +335,7 @@ setTimeout(function() {
 					mafAddr.selStatus = 'pre_selected';
 					MASSGIS.linkedAddressLayer.addFeatures([mafAddr]);
 
-					var addr_pt = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID",mafAddr.attributes.ADDRESS_POINT_ID);
+					var addr_pt = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id",mafAddr.attributes.address_point_id);
 					$.each(addr_pt, function(idx, feature) {
 						MASSGIS.preSelectionLayer.addFeatures([feature.clone()]);
 					});
@@ -371,13 +371,13 @@ setTimeout(function() {
 		$.each(MASSGIS.lyr_maf.features, function(idx, feature) {
 			var m = true;
 			$.each(aQueryTerms, function(idx, term) {
-				if (feature.attributes.ADDRESS_STATUS == 'DELETED') {
+				if (feature.attributes.address_status == 'DELETED') {
 					m = false;
 					return false;
 				}
 				if (
 					!feature.attributes[term.attr]
-					|| (term.attr == 'FULL_NUMBER_STANDARDIZED' && feature.attributes[term.attr].toUpperCase() != term.val.toUpperCase())
+					|| (term.attr == 'full_number_standardized' && feature.attributes[term.attr].toUpperCase() != term.val.toUpperCase())
 					|| feature.attributes[term.attr].toUpperCase().indexOf(term.val.toUpperCase()) == -1
 				) {
 					m = false;
@@ -534,15 +534,15 @@ setTimeout(function() {
 		if (MASSGIS.undoStack) {
 //console.dir(MASSGIS.undoStack);
 			if (MASSGIS.undoStack.action == 'click_to_delete') {
-				MASSGIS.undoStack.f.attributes.ADDRESS_POINT_ID = MASSGIS.undoStack.ADDRESS_POINT_ID;
-				MASSGIS.undoStack.f.attributes.EDIT_STATUS = MASSGIS.undoStack.EDIT_STATUS;
-				MASSGIS.undoStack.f.attributes.STATUS_COLOR = MASSGIS.undoStack.STATUS_COLOR;
+				MASSGIS.undoStack.f.attributes.address_point_id = MASSGIS.undoStack.address_point_id;
+				MASSGIS.undoStack.f.attributes.edit_status = MASSGIS.undoStack.edit_status;
+				MASSGIS.undoStack.f.attributes.status_color = MASSGIS.undoStack.status_color;
 				MASSGIS.linkedAddressLayer.addFeatures([MASSGIS.undoStack.f]);
 
 				// There is no more FULL_ADDR, so this doesn't really do anything useful other than
 				// return the undo record.  Lucky for us, there is only one.
-				var mafFeature = MASSGIS.lyr_maf.getFeaturesByAttribute('MASTER_ADDRESS_ID',MASSGIS.undoStack.f.attributes.MASTER_ADDRESS_ID)[0];
-				mafFeature.attributes.EDIT_STATUS = MASSGIS.undoStack.EDIT_STATUS;
+				var mafFeature = MASSGIS.lyr_maf.getFeaturesByAttribute('master_address_id',MASSGIS.undoStack.f.attributes.master_address_id)[0];
+				mafFeature.attributes.edit_status = MASSGIS.undoStack.edit_status;
 				mafFeature.state = OpenLayers.State.UPDATE;
 				MASSGIS.lyr_maf.strategies[1].save();
 
@@ -550,9 +550,9 @@ setTimeout(function() {
 				MASSGIS.renderAddressList();
 
 				if (MASSGIS.undoStack.address_point) {
-					var addrPt = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID",MASSGIS.undoStack.ADDRESS_POINT_ID)[0];
-					addrPt.attributes.ADDRESS_STATUS = MASSGIS.undoStack.address_point.ADDRESS_STATUS;
-					addrPt.attributes.STATUS_COLOR = MASSGIS.undoStack.address_point.STATUS_COLOR;
+					var addrPt = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id",MASSGIS.undoStack.address_point_id)[0];
+					addrPt.attributes.address_status = MASSGIS.undoStack.address_point.address_status;
+					addrPt.attributes.status_color = MASSGIS.undoStack.address_point.status_color;
 					addrPt.state = OpenLayers.State.UPDATE;
 					MASSGIS.lyr_address_points.strategies[1].save();
 					MASSGIS.lyr_address_points.reindex();
@@ -598,9 +598,9 @@ setTimeout(function() {
 
 				// finally, go through each address point id that was modified (nulled, probably)
 				// and re-set it back to it's original value
-				var addrPtId = MASSGIS.undoStack.f[0].attributes.ADDRESS_POINT_ID;
+				var addrPtId = MASSGIS.undoStack.f[0].attributes.address_point_id;
 				$.each(MASSGIS.undoStack.madRecIds, function(idx, madRec) {
-					madRec.attributes.ADDRESS_POINT_ID = addrPtId;
+					madRec.attributes.address_point_id = addrPtId;
 				});
 			}
 			else if (MASSGIS.undoStack.action == 'link') {
@@ -608,7 +608,7 @@ setTimeout(function() {
 				var modifiedFeatures = MASSGIS.undoStack.lyr_mafModified;
 				for (var i = 0; i < modifiedFeatures.length; i++) {
 					var f = MASSGIS.lyr_maf.getFeatureByFid(modifiedFeatures[i].fid);
-					$.each(["ADDRESS_POINT_ID","STATUS_COLOR","ADDRESS_STATUS","EDIT_STATUS'"], function(idx, prop) {
+					$.each(["address_point_id","status_color","address_status","edit_status'"], function(idx, prop) {
 						f.attributes[prop] = modifiedFeatures[i].attributes[prop];
 					});
 					f.state = OpenLayers.State.UPDATE;
@@ -732,8 +732,8 @@ setTimeout(function() {
 			// w/ only the one point.  Then go back and mark the newly linked point as primary and the orphaned points
 			// as secondary as well as pointing the new orphans to the 'new' parent.
 			MASSGIS.undoStack.selectionLayer = MASSGIS.selectionLayer.features;
-			var origAddrPtId = MASSGIS.selectionLayer.features[0].attributes.ADDRESS_POINT_ID;
-			var origAddrPt = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID",origAddrPtId)[0];
+			var origAddrPtId = MASSGIS.selectionLayer.features[0].attributes.address_point_id;
+			var origAddrPt = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id",origAddrPtId)[0];
 			if (origAddrPt.geometry.components.length == 1) {
 				alert("No need to mark this point as primary, since there's just one part");
 				return;
@@ -744,11 +744,11 @@ setTimeout(function() {
 			$.each(origAddrPt.attributes, function(key, value) {
 				newFeature.attributes[key] = origAddrPt.attributes[key];
 			});
-			newFeature.attributes.STATUS_COLOR = "GREEN";
-			newFeature.attributes.GEOGRAPHIC_EDIT_STATUS = "MODIFIED";
-			newFeature.attributes.STRUCTURE_TYPE = "P";
-			newFeature.attributes.TRANSACTION_ID = txId;
-			newFeature.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+			newFeature.attributes.status_color = "GREEN";
+			newFeature.attributes.geographic_edit_status = "MODIFIED";
+			newFeature.attributes.structure_type = "P";
+			newFeature.attributes.transaction_id = txId;
+			newFeature.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 			newFeature.state = OpenLayers.State.INSERT;
 			newFeature.attributes.__MODIFIED__ = true;
 			MASSGIS.lyr_address_points.addFeatures([newFeature]);
@@ -764,17 +764,17 @@ setTimeout(function() {
 					return false;
 				}
 			});
-			//origAddrPt.attributes.STATUS_COLOR = "???";
-			origAddrPt.attributes.ADDRESS_STATUS = "UNLINKED";
-			origAddrPt.attributes.GEOGRAPHIC_EDIT_STATUS = "SPLIT";
-			origAddrPt.attributes.STRUCTURE_TYPE = "S";
-			origAddrPt.attributes.PARENT_ID = origAddrPtId;
-			origAddrPt.attributes.TRANSACTION_ID = txId;
-			origAddrPt.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+			//origAddrPt.attributes.status_color = "???";
+			origAddrPt.attributes.address_status = "UNLINKED";
+			origAddrPt.attributes.geographic_edit_status = "SPLIT";
+			origAddrPt.attributes.structure_type = "S";
+			origAddrPt.attributes.parent_id = origAddrPtId;
+			origAddrPt.attributes.transaction_id = txId;
+			origAddrPt.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 			origAddrPt.attributes.__MODIFIED__ = true;
 			var centroid = origAddrPt.geometry.getCentroid().clone();
 			centroid.transform("EPSG:900913","EPSG:26986");
-			origAddrPt.attributes.ADDRESS_POINT_ID = "M_" + Math.round(centroid.x) + "_" + Math.round(centroid.y);
+			origAddrPt.attributes.address_point_id = "M_" + Math.round(centroid.x) + "_" + Math.round(centroid.y);
 
 			origAddrPt.state = OpenLayers.State.UPDATE;
 
@@ -798,10 +798,10 @@ setTimeout(function() {
 		// the simple case with simple logic.
 		var addrPointComponentCounts = {};
 		$.each(MASSGIS.selectionLayer.features,function(idx,selectionPoint) {
-			if (!addrPointComponentCounts[selectionPoint.attributes.ADDRESS_POINT_ID]) {
-				addrPointComponentCounts[selectionPoint.attributes.ADDRESS_POINT_ID] = 1;
+			if (!addrPointComponentCounts[selectionPoint.attributes.address_point_id]) {
+				addrPointComponentCounts[selectionPoint.attributes.address_point_id] = 1;
 			} else {
-				addrPointComponentCounts[selectionPoint.attributes.ADDRESS_POINT_ID]++;
+				addrPointComponentCounts[selectionPoint.attributes.address_point_id]++;
 			}
 		});
 		var uniqueAddrPtIds = $.map(addrPointComponentCounts,function(value, key) {return key;});
@@ -809,10 +809,10 @@ setTimeout(function() {
 
 		var isSplit = false;
 		$.each(uniqueAddrPtIds,function(idx,addrPtId) {
-			var origPoint = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID", addrPtId);
+			var origPoint = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id", addrPtId);
 			if (origPoint.length > 1) {
-				alert("Error:  Two Points in Address Point Database with ADDRESS_POINT_ID = " + addrPtId);
-				throw {"error": "true", "msg" : "why are there two points in the db with ADDRESS_POINT_ID = " + addrPtId};
+				alert("Error:  Two Points in Address Point Database with address_point_id = " + addrPtId);
+				throw {"error": "true", "msg" : "why are there two points in the db with address_point_id = " + addrPtId};
 			}
 			origPoint = origPoint[0];
 			if (origPoint.geometry.components.length > addrPointComponentCounts[addrPtId]) {
@@ -823,31 +823,31 @@ setTimeout(function() {
 
 		if (!isSplit && !isMerge) {
 			//Ok, it's a "simple" linkage -- UC#11
-			var origAddressPoint = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID", uniqueAddrPtIds[0])[0];
+			var origAddressPoint = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id", uniqueAddrPtIds[0])[0];
 			var f = origAddressPoint.clone();
 			f.fid = origAddressPoint.fid;
 			MASSGIS.undoStack.lyr_address_pointsModified.push(f);
-			origAddressPoint.attributes.STATUS_COLOR = "GREEN";
-			origAddressPoint.attributes.ADDRESS_STATUS = "LINKED";
-			origAddressPoint.attributes.TRANSACTION_ID = txId;
-			origAddressPoint.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+			origAddressPoint.attributes.status_color = "GREEN";
+			origAddressPoint.attributes.address_status = "LINKED";
+			origAddressPoint.attributes.transaction_id = txId;
+			origAddressPoint.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 			origAddressPoint.state = OpenLayers.State.UPDATE;
 			origAddressPoint.attributes.__MODIFIED__ = true;
 
 			// now go through the MAD records and null all records that have this addr point id
 			MASSGIS.lyr_maf.reindex();
 			var toBeRelabeled = [];
-			$.each(MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",uniqueAddrPtIds[0]), function(idx, madRec) {
+			$.each(MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",uniqueAddrPtIds[0]), function(idx, madRec) {
 				var f = madRec.clone();
 				f.fid = madRec.fid;
 				MASSGIS.undoStack.lyr_mafModified.push(f);
-				madRec.attributes.STATUS_COLOR = "RED";
-				toBeRelabeled.push(madRec.attributes.ADDRESS_POINT_ID);
-				madRec.attributes.ADDRESS_POINT_ID = '';
-				madRec.attributes.ADDRESS_STATUS = 'UNLINKED';
-				madRec.attributes.EDIT_STATUS = 'MODIFIED';
-				madRec.attributes.TRANSACTION_ID = txId;
-				madRec.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+				madRec.attributes.status_color = "RED";
+				toBeRelabeled.push(madRec.attributes.address_point_id);
+				madRec.attributes.address_point_id = '';
+				madRec.attributes.address_status = 'UNLINKED';
+				madRec.attributes.edit_status = 'MODIFIED';
+				madRec.attributes.transaction_id = txId;
+				madRec.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 				madRec.attributes.__MODIFIED__ = true;
 				madRec.state = OpenLayers.State.UPDATE;
 			});
@@ -857,13 +857,13 @@ setTimeout(function() {
 				if (linkedRec.selStatus != 'selected') {
 					return;
 				}
-				var madRec = MASSGIS.lyr_maf.getFeaturesByAttribute("MASTER_ADDRESS_ID",linkedRec.attributes.MASTER_ADDRESS_ID)[0];
-				madRec.attributes.ADDRESS_POINT_ID = origAddressPoint.attributes.ADDRESS_POINT_ID;
-				madRec.attributes.STATUS_COLOR = "GREEN";
-				madRec.attributes.ADDRESS_STATUS = 'LINKED';
-				madRec.attributes.EDIT_STATUS = 'MODIFIED';
-				madRec.attributes.TRANSACTION_ID = txId;
-				madRec.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+				var madRec = MASSGIS.lyr_maf.getFeaturesByAttribute("master_address_id",linkedRec.attributes.master_address_id)[0];
+				madRec.attributes.address_point_id = origAddressPoint.attributes.address_point_id;
+				madRec.attributes.status_color = "GREEN";
+				madRec.attributes.address_status = 'LINKED';
+				madRec.attributes.edit_status = 'MODIFIED';
+				madRec.attributes.transaction_id = txId;
+				madRec.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 				madRec.state = OpenLayers.State.UPDATE;
 				madRec.attributes.__MODIFIED__ = true;
 			});
@@ -872,12 +872,12 @@ setTimeout(function() {
 			MASSGIS.lyr_maf.reindex();
 			MASSGIS.renderAddressList();
 
-			origAddressPoint.attributes.LABEL_TEXT = MASSGIS.lyr_address_points.draw_linked_st_num(origAddressPoint);
+			origAddressPoint.attributes.label_text = MASSGIS.lyr_address_points.draw_linked_st_num(origAddressPoint);
 			MASSGIS.lyr_address_points.strategies[1].save();
 			$.each(toBeRelabeled, function(idx, addrPtId) {
-				var fs = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID", addrPtId);
+				var fs = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id", addrPtId);
 				$.each(fs, function(idx, addrPt) {
-					addrPt.attributes.LABEL_TEXT = MASSGIS.lyr_address_points.draw_linked_st_num(addrPt);
+					addrPt.attributes.label_text = MASSGIS.lyr_address_points.draw_linked_st_num(addrPt);
 				});
 			});
 			MASSGIS.lyr_address_points.reindex();
@@ -918,11 +918,11 @@ setTimeout(function() {
 		// 4.  Copy that address_point_id to all "selected" lyr_maf records
 		$.each(MASSGIS.selectionLayer.features,function(idx,selectionPoint) {
 			points.push(selectionPoint.geometry.components[0].clone());
-			addrpt_ids.push(selectionPoint.attributes.ADDRESS_POINT_ID);
-			pointTypes.push(selectionPoint.attributes.POINT_TYPE);
+			addrpt_ids.push(selectionPoint.attributes.address_point_id);
+			pointTypes.push(selectionPoint.attributes.point_type);
 
 			// Get address(es) whose address_point_id matches the selection point.
-			$.each(MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID",selectionPoint.attributes.ADDRESS_POINT_ID),function(idx,addressMultiPoint) {
+			$.each(MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id",selectionPoint.attributes.address_point_id),function(idx,addressMultiPoint) {
 				var addressMultiPointClone = addressMultiPoint.clone();
 				addressMultiPointClone.fid = addressMultiPoint.fid;
 				addressMultiPointClone.layer = addressMultiPoint.layer;
@@ -934,10 +934,10 @@ setTimeout(function() {
 					if (addressPoint && selectionPoint.geometry.getBounds().equals(addressPoint.getBounds())) {
 						if (addressMultiPoint.geometry.components.length == 1) {
 							// Nuke the whole thing if the addrMP only has 1 component.
-							addressMultiPoint.attributes.STATUS_COLOR = 'NONE';
-							addressMultiPoint.attributes.GEOGRAPHIC_EDIT_STATUS = 'DELETED';
-							addressMultiPoint.attributes.TRANSACTION_ID = txId;
-							addressMultiPoint.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+							addressMultiPoint.attributes.status_color = 'NONE';
+							addressMultiPoint.attributes.geographic_edit_status = 'DELETED';
+							addressMultiPoint.attributes.transaction_id = txId;
+							addressMultiPoint.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 							addressMultiPoint.state = OpenLayers.State.UPDATE;
 							// Keep track of the deleted points, so we can fix them up later
 							deleted.push(addressMultiPoint);
@@ -946,11 +946,11 @@ setTimeout(function() {
 							// Nuke the selected point(s).
 							addressMultiPoint.geometry.removePoint(addressPoint);
 							// Next line is commented out so non-modified components won't have their icon changed.
-							toBeRelabeled.push(addressMultiPoint.attributes.ADDRESS_POINT_ID);
-							addressMultiPoint.attributes.GEOGRAPHIC_EDIT_STATUS = 'MODIFIED';
-							addressMultiPoint.attributes.ADDRESS_STATUS = 'SPLIT';
-							addressMultiPoint.attributes.TRANSACTION_ID = txId;
-							addressMultiPoint.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+							toBeRelabeled.push(addressMultiPoint.attributes.address_point_id);
+							addressMultiPoint.attributes.geographic_edit_status = 'MODIFIED';
+							addressMultiPoint.attributes.address_status = 'SPLIT';
+							addressMultiPoint.attributes.transaction_id = txId;
+							addressMultiPoint.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 							addressMultiPoint.state = OpenLayers.State.UPDATE;
 							addressMultiPoint.attributes.__MODIFIED__ = true;
 						}
@@ -991,34 +991,34 @@ setTimeout(function() {
 		if (pointTypes.length == 1 && pointTypes[0] == 'ABC') {
 			newPtType = 'ABC';
 		}
-		var origAddressPoint = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID", uniqueAddrPtIds[0])[0];
+		var origAddressPoint = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id", uniqueAddrPtIds[0])[0];
 		var newFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.MultiPoint(points));
-		newFeature.attributes.ADDRESS_POINT_ID		= address_point_id;
-		newFeature.attributes.ADDRESS_STATUS		= 'LINKED';
-		newFeature.attributes.GEOGRAPHIC_EDIT_STATUS= 'ADDED';
-		newFeature.attributes.STATUS_COLOR			= 'GREEN';
-		newFeature.attributes.TYPE_ICON				= 'CIRCLE';
-		newFeature.attributes.SITE_ID				= origAddressPoint.attributes.SITE_ID;
-		newFeature.attributes.COMMUNITY_ID			= origAddressPoint.attributes.COMMUNITY_ID;
-		newFeature.attributes.LOC_ID				= origAddressPoint.attributes.LOC_ID;
-		newFeature.attributes.GEOGRAPHIC_TOWN_ID	= origAddressPoint.attributes.GEOGRAPHIC_TOWN_ID;
-		newFeature.attributes.TRANSACTION_ID = txId;
-		newFeature.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
-		newPtType && (newFeature.attributes.POINT_TYPE = newPtType);
+		newFeature.attributes.address_point_id		= address_point_id;
+		newFeature.attributes.address_status		= 'LINKED';
+		newFeature.attributes.geographic_edit_status= 'ADDED';
+		newFeature.attributes.status_color			= 'GREEN';
+		newFeature.attributes.type_icon				= 'CIRCLE';
+		newFeature.attributes.site_id				= origAddressPoint.attributes.site_id;
+		newFeature.attributes.community_id			= origAddressPoint.attributes.community_id;
+		newFeature.attributes.loc_id				= origAddressPoint.attributes.loc_id;
+		newFeature.attributes.geographic_town_id	= origAddressPoint.attributes.geographic_town_id;
+		newFeature.attributes.transaction_id = txId;
+		newFeature.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
+		newPtType && (newFeature.attributes.point_type = newPtType);
 		newFeature.state = OpenLayers.State.INSERT;
 		newFeature.attributes.__MODIFIED__ = true;
 
 		// Null out the original address point id on any delete points address_point_id maf records
 		$.each(deleted, function(idx, deletedPoint) {
-			$.each(MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",deletedPoint.attributes.ADDRESS_POINT_ID), function(idx, madRec) {
+			$.each(MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",deletedPoint.attributes.address_point_id), function(idx, madRec) {
 				var f = madRec.clone();
 				f.fid = madRec.fid;
 				MASSGIS.undoStack.lyr_mafModified.push(f);
-				madRec.attributes.ADDRESS_POINT_ID = null;
-				madRec.attributes.STATUS_COLOR = "RED";
-				madRec.attributes.ADDRESS_STATUS = "UNLINKED";
-				madRec.attributes.TRANSACTION_ID = txId;
-				madRec.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+				madRec.attributes.address_point_id = null;
+				madRec.attributes.status_color = "RED";
+				madRec.attributes.address_status = "UNLINKED";
+				madRec.attributes.transaction_id = txId;
+				madRec.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 				madRec.state = OpenLayers.State.UPDATE;
 				madRec.attributes.__MODIFIED__ = true;
 			});
@@ -1031,11 +1031,11 @@ setTimeout(function() {
 				var fClone = f.clone();
 				fClone.fid = f.fid;
 				MASSGIS.undoStack.lyr_mafModified.push(fClone);
-				f.attributes.ADDRESS_POINT_ID	= address_point_id;
-				f.attributes.ADDRESS_STATUS		= 'LINKED';
-				f.attributes.STATUS_COLOR		= 'GREEN';
-				f.attributes.TRANSACTION_ID		= txId;
-				f.attributes.TIME_STAMP			= new Date().toTimeString().split(" ")[0];
+				f.attributes.address_point_id	= address_point_id;
+				f.attributes.address_status		= 'LINKED';
+				f.attributes.status_color		= 'GREEN';
+				f.attributes.transaction_id		= txId;
+				f.attributes.time_stamp			= new Date().toTimeString().split(" ")[0];
 				f.state							= OpenLayers.State.UPDATE;
 				f.attributes.__MODIFIED__		= true;
 				forRemovalLinkedAddresses.push(linkedAddress);
@@ -1049,14 +1049,14 @@ setTimeout(function() {
 		MASSGIS.renderLinkedAddresses();
 
 		// now that our maf points are linked, update the label_text accordingly
-		newFeature.attributes.LABEL_TEXT= MASSGIS.lyr_address_points.draw_linked_st_num(newFeature);
+		newFeature.attributes.label_text= MASSGIS.lyr_address_points.draw_linked_st_num(newFeature);
 		MASSGIS.lyr_address_points.addFeatures([newFeature]);
 		MASSGIS.undoStack.lyr_address_pointsAdded.push(newFeature);
 
 		$.each(toBeRelabeled, function(idx, addrPtId) {
-			var fs = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID", addrPtId);
+			var fs = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id", addrPtId);
 			$.each(fs, function(idx, addrPt) {
-				addrPt.attributes.LABEL_TEXT = MASSGIS.lyr_address_points.draw_linked_st_num(addrPt);
+				addrPt.attributes.label_text = MASSGIS.lyr_address_points.draw_linked_st_num(addrPt);
 			});
 		});
 		MASSGIS.lyr_address_points.strategies[1].save();
@@ -1120,31 +1120,31 @@ setTimeout(function() {
 			// remove address_point_id reference from MAF
 			MASSGIS.undoStack = {
 				"action"			: 'click_to_delete',
-				"ADDRESS_POINT_ID"	: f.attributes.ADDRESS_POINT_ID,
-				"EDIT_STATUS"		: f.attributes.EDIT_STATUS,
-				"STATUS_COLOR"		: f.attributes.STATUS_COLOR
+				"address_point_id"	: f.attributes.address_point_id,
+				"edit_status"		: f.attributes.edit_status,
+				"status_color"		: f.attributes.status_color
 			};
 
 
 			var txId = MASSGIS.generateTXId();
 
 			// get the lyr_maf version of this feature
-			if (f.attributes.MASTER_ADDRESS_ID == 0) {
+			if (f.attributes.master_address_id == 0) {
 				// this isn't a point that the server even knows about yet.  No need to retain it going forward
 				f = MASSGIS.lyr_maf.getFeatureByFid(f.fid);
 				f.state = OpenLayers.State.DELETE;
 				MASSGIS.undoStack.f = f;
 			} else {
-				f = MASSGIS.lyr_maf.getFeaturesByAttribute('MASTER_ADDRESS_ID',f.attributes.MASTER_ADDRESS_ID)[0];
+				f = MASSGIS.lyr_maf.getFeaturesByAttribute('master_address_id',f.attributes.master_address_id)[0];
 				MASSGIS.undoStack.f = f;
-				//EDIT_STATUS changes
-				//f.attributes.EDIT_STATUS = 'DELETED';
-				f.attributes.ADDRESS_STATUS = 'DELETED';
-				// leave a "null" ADDRESS_POINT_ID as null, but tack "_D" onto any legit addrptids
-				f.attributes.ADDRESS_POINT_ID = f.attributes.ADDRESS_POINT_ID ? f.attributes.ADDRESS_POINT_ID + "_D" : f.attributes.ADDRESS_POINT_ID;
-				f.attributes.STATUS_COLOR = 'NONE';
-				f.attributes.TRANSACTION_ID = txId;
-				f.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+				//edit_status changes
+				//f.attributes.edit_status = 'DELETED';
+				f.attributes.address_status = 'DELETED';
+				// leave a "null" address_point_id as null, but tack "_D" onto any legit addrptids
+				f.attributes.address_point_id = f.attributes.address_point_id ? f.attributes.address_point_id + "_D" : f.attributes.address_point_id;
+				f.attributes.status_color = 'NONE';
+				f.attributes.transaction_id = txId;
+				f.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 				f.state = OpenLayers.State.UPDATE;
 				f.attributes.__MODIFIED__ = true;
 			}
@@ -1154,26 +1154,26 @@ setTimeout(function() {
 			MASSGIS.lyr_maf.strategies[1].save();
 			MASSGIS.lyr_maf.reindex();
 
-			if (!f.attributes.ADDRESS_POINT_ID) {
+			if (!f.attributes.address_point_id) {
 				return;
 			}
 
 			// we also need to mark a potentially affected address point as red, if it were orphaned
-			addrPts = MASSGIS.lyr_address_points.getFeaturesByAttribute('ADDRESS_POINT_ID',MASSGIS.undoStack.ADDRESS_POINT_ID);
+			addrPts = MASSGIS.lyr_address_points.getFeaturesByAttribute('address_point_id',MASSGIS.undoStack.address_point_id);
 			if (addrPts.length > 0) {
-				siblingMadRecs = MASSGIS.lyr_maf.getFeaturesByAttribute('ADDRESS_POINT_ID',MASSGIS.undoStack.ADDRESS_POINT_ID);
+				siblingMadRecs = MASSGIS.lyr_maf.getFeaturesByAttribute('address_point_id',MASSGIS.undoStack.address_point_id);
 				if (siblingMadRecs.length === 0) {
 					MASSGIS.undoStack.address_point = {
-						"STATUS_COLOR" :	addrPts[0].attributes.STATUS_COLOR,
-						"ADDRESS_STATUS" :	addrPts[0].attributes.ADDRESS_STATUS
+						"status_color" :	addrPts[0].attributes.status_color,
+						"address_status" :	addrPts[0].attributes.address_status
 					};
 					addrPts[0].state = OpenLayers.State.UPDATE;
 					addrPts[0].attributes.__MODIFIED__ = true;
-					addrPts[0].attributes.STATUS_COLOR = "RED";
-					addrPts[0].attributes.ADDRESS_STATUS = "UNLINKED";
-					addrPts[0].attributes.LABEL_TEXT = MASSGIS.lyr_address_points.draw_linked_st_num(addrPts[0]);
-					addrPts[0].attributes.TRANSACTION_ID = txId;
-					addrPts[0].attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+					addrPts[0].attributes.status_color = "RED";
+					addrPts[0].attributes.address_status = "UNLINKED";
+					addrPts[0].attributes.label_text = MASSGIS.lyr_address_points.draw_linked_st_num(addrPts[0]);
+					addrPts[0].attributes.transaction_id = txId;
+					addrPts[0].attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 					MASSGIS.lyr_address_points.strategies[1].save();
 					MASSGIS.lyr_address_points.reindex();
 					MASSGIS.lyr_address_points.redraw();
@@ -1190,29 +1190,29 @@ setTimeout(function() {
 		}
 		var f = MASSGIS.lyr_maf.getFeatureByFid(MASSGIS.lyr_maf.features[0].fid).clone();
 		f.state = OpenLayers.State.INSERT;
-		f.attributes.ADDRESS_POINT_ID = '';
-		f.attributes.ADDRESS_STATUS = 'ADDED';
-		f.attributes.BUILDING_NAME = null;
-		f.attributes.FULL_NUMBER_STANDARDIZED = '';
-		f.attributes.LAST_EDIT_BY = null;
-		f.attributes.LAST_EDIT_COMMENTS = null;
-		f.attributes.LAST_EDIT_DATE = null;
-		f.attributes.MASTER_ADDRESS_ID = 'NEW-' + Math.random();
-		f.attributes.MULTT_ID = null;
-		f.attributes.PARENT_ADDRESS_ID = null;
-		f.attributes.REL_LOC = null;
-		f.attributes.SITE_ID = null;
-		f.attributes.SITE_NAME = null;
-		f.attributes.STATUS_COLOR = 'RED';
-		f.attributes.STREET_NAME = '';
-		f.attributes.STREET_NAME_ID = null;
-		f.attributes.SUBSITE = null;
-		f.attributes.UNIT = null;
-		//EDIT_STATUS changes
-		//f.attributes.ADDRESS_STATUS = 'UNASSIGNED';
-		//f.attributes.EDIT_STATUS = 'ADDED';
-		f.attributes.TRANSACTION_ID = MASSGIS.generateTXId();
-		f.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+		f.attributes.address_point_id = '';
+		f.attributes.address_status = 'ADDED';
+		f.attributes.building_name = null;
+		f.attributes.full_number_standardized = '';
+		f.attributes.last_edit_by = null;
+		f.attributes.last_edit_comments = null;
+		f.attributes.last_edit_date = null;
+		f.attributes.master_address_id = 'NEW-' + Math.random();
+		f.attributes.multt_id = null;
+		f.attributes.parent_address_id = null;
+		f.attributes.rel_loc = null;
+		f.attributes.site_id = null;
+		f.attributes.site_name = null;
+		f.attributes.status_color = 'RED';
+		f.attributes.street_name = '';
+		f.attributes.street_name_id = null;
+		f.attributes.subsite = null;
+		f.attributes.unit = null;
+		//edit_status changes
+		//f.attributes.address_status = 'UNASSIGNED';
+		//f.attributes.edit_status = 'ADDED';
+		f.attributes.transaction_id = MASSGIS.generateTXId();
+		f.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 		f.attributes.__MODIFIED__ = true;
 		delete f.fid;
 		MASSGIS.lyr_maf.addFeatures([f]);
@@ -1234,16 +1234,16 @@ setTimeout(function() {
 		// add to MAF
 		var f = MASSGIS.lyr_maf.getFeatureByFid($(this).data('fid')).clone();
 		f.state = OpenLayers.State.INSERT;
-		f.attributes.ADDRESS_POINT_ID = '';
-		//f.attributes.MASTER_ADDRESS_ID = 0;
-		f.attributes.MASTER_ADDRESS_ID = 'NEW-' + Math.random();
-		f.attributes.STATUS_COLOR = 'RED';
-		//EDIT_STATUS changes
-		//f.attributes.ADDRESS_STATUS = 'UNASSIGNED';
-		//f.attributes.EDIT_STATUS = 'ADDED';
-		f.attributes.ADDRESS_STATUS = 'ADDED';
-		f.attributes.TRANSACTION_ID = MASSGIS.generateTXId();
-		f.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+		f.attributes.address_point_id = '';
+		//f.attributes.master_address_id = 0;
+		f.attributes.master_address_id = 'NEW-' + Math.random();
+		f.attributes.status_color = 'RED';
+		//edit_status changes
+		//f.attributes.address_status = 'UNASSIGNED';
+		//f.attributes.edit_status = 'ADDED';
+		f.attributes.address_status = 'ADDED';
+		f.attributes.transaction_id = MASSGIS.generateTXId();
+		f.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 		f.attributes.__MODIFIED__ = true;
 		delete f.fid;
 		MASSGIS.lyr_maf.addFeatures([f]);
@@ -1274,11 +1274,11 @@ setTimeout(function() {
 
 	$('#edit_popup a[data-icon="check"]').on("click",function(e) {
 		// validation, need to enter a street name and number
-		if ($('#edit_STREET_NAME').val() == '') {
+		if ($('#edit_street_name').val() == '') {
 			alert('please enter a street name');
 			return false;
 		}
-		if ($('#edit_FULL_NUMBER_STANDARDIZED').val() == '') {
+		if ($('#edit_full_number_standardized').val() == '') {
 			alert('please enter an address number');
 			return false;
 		}
@@ -1287,8 +1287,8 @@ setTimeout(function() {
 			MASSGIS.new_address_fid = null;
 		}
 		var f = MASSGIS.linkedAddressLayer.getFeatureByFid($('#edit_popup').data('fid'));
-		var origSiteName = f.attributes.SITE_NAME;
-		var newSiteName = $('#edit_SITE_NAME').val();
+		var origSiteName = f.attributes.site_name;
+		var newSiteName = $('#edit_site_name').val();
 		if (origSiteName && origSiteName != newSiteName) {
 			var changeOthers = confirm("You have updated the site name of this address.  By changing this site name, you will update this site name for EVERY ADDRESS with this site name.  Are you sure you wish to continue?  Click 'ok' to make this change for ALL ADDRESSES with this site name, or 'cancel' to cancel this change.");
 			if (!changeOthers) {
@@ -1298,21 +1298,21 @@ setTimeout(function() {
 		$.each(f.attributes, function(attr, value) {
 			$('#edit_' + attr).length > 0 && (f.attributes[attr] = $('#edit_' + attr).val());
 		});
-//		EDIT_STATUS changes
-//		if (!f.attributes.EDIT_STATUS || f.attributes.EDIT_STATUS != "ADDED") {
-//			f.attributes.EDIT_STATUS = 'MODIFIED';
+//		edit_status changes
+//		if (!f.attributes.edit_status || f.attributes.edit_status != "ADDED") {
+//			f.attributes.edit_status = 'MODIFIED';
 //		}
-		if (!f.attributes.ADDRESS_STATUS || f.attributes.ADDRESS_STATUS != "ADDED") {
-			f.attributes.ADDRESS_STATUS = 'MODIFIED';
+		if (!f.attributes.address_status || f.attributes.address_status != "ADDED") {
+			f.attributes.address_status = 'MODIFIED';
 		}
-//		if (f.attributes.ADDRESS_POINT_ID) {
-//			f.attributes.STATUS_COLOR = 'GREEN';
+//		if (f.attributes.address_point_id) {
+//			f.attributes.status_color = 'GREEN';
 //		}
-		if (!MASSGIS.streets_to_street_id_hash[f.attributes.STREET_NAME]) {
+		if (!MASSGIS.streets_to_street_id_hash[f.attributes.street_name]) {
 			//brand new street.  Give it a street_name_id of zero
-			f.attributes.STREET_NAME_ID = 0;
-		} else if (f.attributes.STREET_NAME_ID != MASSGIS.streets_to_street_id_hash[f.attributes.STREET_NAME]) {
-			f.attributes.STREET_NAME_ID = MASSGIS.streets_to_street_id_hash[f.attributes.STREET_NAME];
+			f.attributes.street_name_id = 0;
+		} else if (f.attributes.street_name_id != MASSGIS.streets_to_street_id_hash[f.attributes.street_name]) {
+			f.attributes.street_name_id = MASSGIS.streets_to_street_id_hash[f.attributes.street_name];
 		}
 
 		var txId = MASSGIS.generateTXId();
@@ -1320,44 +1320,44 @@ setTimeout(function() {
 
 		// per dan's/mike's email on 9/25
 		if (!origSiteName && !newSiteName) {
-			// no changes to SITE_NAME_ID, SITE_ID or SITE_NAME
+			// no changes to site_name_id, site_id or site_name
 		} else if (origSiteName && !newSiteName) {
 			// they blanked out the site name, so we'll do case C.
-			f.attributes.SITE_NAME = '';
+			f.attributes.site_name = '';
 
-			if (f.attributes.SITE_ID) {
-				var others = MASSGIS.lyr_maf.getFeaturesByAttribute("SITE_ID", f.attributes.SITE_ID);
+			if (f.attributes.site_id) {
+				var others = MASSGIS.lyr_maf.getFeaturesByAttribute("site_id", f.attributes.site_id);
 				if (others.length !== 0) {
 					$.each(others, function(idx, feature) {
-						feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
-						feature.attributes.SITE_NAME_ID = newSiteNameId;
-						if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
-							feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						feature.attributes.site_name = f.attributes.site_name;
+						feature.attributes.site_name_id = newSiteNameId;
+						if (feature.attributes.address_status != 'DELETED') {
+							feature.attributes.address_status = 'MODIFIED';
 						}
-						feature.attributes.TRANSACTION_ID = txId;
-						feature.attributes.TIME_STAMP = timestamp;
+						feature.attributes.transaction_id = txId;
+						feature.attributes.time_stamp = timestamp;
 						feature.state = OpenLayers.State.UPDATE;
 						feature.attributes.__MODIFIED__ = true;
 					});
 				}
 			}
 
-			var others = MASSGIS.lyr_maf.getFeaturesByAttribute("SITE_NAME", origSiteName);
+			var others = MASSGIS.lyr_maf.getFeaturesByAttribute("site_name", origSiteName);
 			if (others.length !== 0) {
 				$.each(others, function(idx, feature) {
-					feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
-					feature.attributes.SITE_NAME_ID = newSiteNameId;
-					if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
-						feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+					feature.attributes.site_name = f.attributes.site_name;
+					feature.attributes.site_name_id = newSiteNameId;
+					if (feature.attributes.address_status != 'DELETED') {
+						feature.attributes.address_status = 'MODIFIED';
 					}
-					feature.attributes.TRANSACTION_ID = txId;
-					feature.attributes.TIME_STAMP = timestamp;
+					feature.attributes.transaction_id = txId;
+					feature.attributes.time_stamp = timestamp;
 					feature.state = OpenLayers.State.UPDATE;
 					feature.attributes.__MODIFIED__ = true;
 				});
 			}
 
-		} else if (origSiteName != f.attributes.SITE_NAME && newSiteName) {
+		} else if (origSiteName != f.attributes.site_name && newSiteName) {
 			// This is both cases B and D
 			// 1. - site_name_id is set to the existing site_name_id for the newSiteName, or else zero
 			var newSiteNameId;
@@ -1366,20 +1366,20 @@ setTimeout(function() {
 			} else {
 				newSiteNameId = MASSGIS.sites_to_site_name_id_hash[newSiteName] || 0;
 			}
-			newSiteNameId !== false && (f.attributes.SITE_NAME_ID = newSiteNameId);
+			newSiteNameId !== false && (f.attributes.site_name_id = newSiteNameId);
 
-			// this is a legit site, so go and find all the matching SITE_IDs in the maf table and update them
-			if (f.attributes.SITE_ID) {
-				var others = MASSGIS.lyr_maf.getFeaturesByAttribute("SITE_ID", f.attributes.SITE_ID);
+			// this is a legit site, so go and find all the matching site_ids in the maf table and update them
+			if (f.attributes.site_id) {
+				var others = MASSGIS.lyr_maf.getFeaturesByAttribute("site_id", f.attributes.site_id);
 				if (others.length !== 0) {
 					$.each(others, function(idx, feature) {
-						feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
-						newSiteNameId !== false && (feature.attributes.SITE_NAME_ID = newSiteNameId);
-						if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
-							feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						feature.attributes.site_name = f.attributes.site_name;
+						newSiteNameId !== false && (feature.attributes.site_name_id = newSiteNameId);
+						if (feature.attributes.address_status != 'DELETED') {
+							feature.attributes.address_status = 'MODIFIED';
 						}
-						feature.attributes.TRANSACTION_ID = txId;
-						feature.attributes.TIME_STAMP = timestamp;
+						feature.attributes.transaction_id = txId;
+						feature.attributes.time_stamp = timestamp;
 						feature.state = OpenLayers.State.UPDATE;
 						feature.attributes.__MODIFIED__ = true;
 					});
@@ -1387,52 +1387,52 @@ setTimeout(function() {
 			}
 
 			if (origSiteName) {
-				var others = MASSGIS.lyr_maf.getFeaturesByAttribute("SITE_NAME", origSiteName);
+				var others = MASSGIS.lyr_maf.getFeaturesByAttribute("site_name", origSiteName);
 				if (others.length !== 0) {
 					$.each(others, function(idx, feature) {
-						feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
-						newSiteNameId !== false && (feature.attributes.SITE_NAME_ID = newSiteNameId);
-						if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
-							feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+						feature.attributes.site_name = f.attributes.site_name;
+						newSiteNameId !== false && (feature.attributes.site_name_id = newSiteNameId);
+						if (feature.attributes.address_status != 'DELETED') {
+							feature.attributes.address_status = 'MODIFIED';
 						}
-						feature.attributes.TRANSACTION_ID = txId;
-						feature.attributes.TIME_STAMP = timestamp;
+						feature.attributes.transaction_id = txId;
+						feature.attributes.time_stamp = timestamp;
 						feature.state = OpenLayers.State.UPDATE;
 						feature.attributes.__MODIFIED__ = true;
 					});
 				}
 			}
 
-			if (f.attributes.SITE_ID === null) {
-				// If the user edits SITE_NAME for an address record where SITE_ID is null, populate that SITE_NAME to all records with the same ADDRESS_POINT_ID.
-				var others = MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",f.attributes.ADDRESS_POINT_ID);
+			if (f.attributes.site_id === null) {
+				// If the user edits site_name for an address record where site_id is null, populate that site_name to all records with the same address_point_id.
+				var others = MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",f.attributes.address_point_id);
 				$.each(others, function(idx, feature) {
-					feature.attributes.SITE_NAME = f.attributes.SITE_NAME;
-					newSiteNameId !== false && (feature.attributes.SITE_NAME_ID = newSiteNameId);
-					if (feature.attributes.ADDRESS_STATUS != 'DELETED') {
-						feature.attributes.ADDRESS_STATUS = 'MODIFIED';
+					feature.attributes.site_name = f.attributes.site_name;
+					newSiteNameId !== false && (feature.attributes.site_name_id = newSiteNameId);
+					if (feature.attributes.address_status != 'DELETED') {
+						feature.attributes.address_status = 'MODIFIED';
 					}
-					feature.attributes.TRANSACTION_ID = txId;
-					feature.attributes.TIME_STAMP = timestamp;
+					feature.attributes.transaction_id = txId;
+					feature.attributes.time_stamp = timestamp;
 					feature.state = OpenLayers.State.UPDATE;
 					feature.attributes.__MODIFIED__ = true;
 				});
 			}
 
-			// if (f.attributes.SITE_ID === null && newSiteName !== '') {
+			// if (f.attributes.site_id === null && newSiteName !== '') {
 			// 	// no site_id set,
-			// 	if (MASSGIS.sites_to_site_id_hash[f.attributes.SITE_NAME]) {
+			// 	if (MASSGIS.sites_to_site_id_hash[f.attributes.site_name]) {
 			// 		// if they picked an existing site_name, update the site_id accordingly
-			// 		f.attributes.SITE_ID = MASSGIS.sites_to_site_id_hash[f.attributes.SITE_NAME];
+			// 		f.attributes.site_id = MASSGIS.sites_to_site_id_hash[f.attributes.site_name];
 			// 	} else {
 			// 		// commented on purpose
-			// 		//f.attributes.SITE_ID = 0;
+			// 		//f.attributes.site_id = 0;
 			// 	}
 			// }
 		}
 
-		f.attributes.TRANSACTION_ID = txId;
-		f.attributes.TIME_STAMP = timestamp;
+		f.attributes.transaction_id = txId;
+		f.attributes.time_stamp = timestamp;
 		f.state = OpenLayers.State.UPDATE;
 		f.attributes.__MODIFIED__ = true;
 		MASSGIS.lyr_maf.strategies[1].save();
@@ -1453,18 +1453,18 @@ setTimeout(function() {
 		});
 
 		// set up the autocomplete on the popup
-		$('#edit_STREET_NAME').autocomplete({
+		$('#edit_street_name').autocomplete({
 			source: MASSGIS.streets_list
 		});
 
-		$('#edit_SITE_NAME').autocomplete({
+		$('#edit_site_name').autocomplete({
 			source: MASSGIS.sites_list
 		});
 		$("#edit_popup").data("fid",$(this).data('fid'));
-		if (f.attributes.ADDRESS_STATUS == "GEOCODED" || f.attributes.ADDRESS_STATUS == "UNASSIGNED") {
-			$('#edit_SITE_NAME').attr("readonly",true);
+		if (f.attributes.address_status == "GEOCODED" || f.attributes.address_status == "UNASSIGNED") {
+			$('#edit_site_name').attr("readonly",true);
 		} else {
-			$('#edit_SITE_NAME').attr("readonly",false);
+			$('#edit_site_name').attr("readonly",false);
 		}
 		$("#edit_popup").popup().popup("open");
 	});
@@ -1497,12 +1497,12 @@ setTimeout(function() {
 			MASSGIS.linkedAddressLayer.addFeatures([mafAddr]);
 
 			// also get the other addresses linked to this same address_point_id
-			if (!mafAddr.attributes.ADDRESS_POINT_ID) {
+			if (!mafAddr.attributes.address_point_id) {
 console.log("no address_point_id on this maf record");
 				return;
 			}
 
-			var otherMafAddrs = MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",mafAddr.attributes.ADDRESS_POINT_ID);
+			var otherMafAddrs = MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",mafAddr.attributes.address_point_id);
 			var cleanOtherMafAddrs = [];
 			$.each(otherMafAddrs, function(idx, madRec) {
 				if (madRec.fid == $(this).data('fid')) {
@@ -1521,10 +1521,10 @@ console.log("no address_point_id on this maf record");
 				zoomToAddr = false;
 			}
 
-console.log("searching for addrs with address point id " + mafAddr.attributes.ADDRESS_POINT_ID);
-			var addr_pt = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID",mafAddr.attributes.ADDRESS_POINT_ID);
+console.log("searching for addrs with address point id " + mafAddr.attributes.address_point_id);
+			var addr_pt = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id",mafAddr.attributes.address_point_id);
 			$.each(addr_pt, function(idx, feature) {
-				feature.attributes.POINT_TYPE !== 'GC' && feature.attributes.GEOGRAPHIC_EDIT_STATUS !== 'DELETED' && MASSGIS.preSelectionLayer.addFeatures([feature.clone()]);
+				feature.attributes.point_type !== 'GC' && feature.attributes.geographic_edit_status !== 'DELETED' && MASSGIS.preSelectionLayer.addFeatures([feature.clone()]);
 			});
 			MASSGIS.preSelectionLayer.redraw();
 
@@ -1534,21 +1534,21 @@ console.log("searching for addrs with address point id " + mafAddr.attributes.AD
 };
 
 MASSGIS.sort_maf_features_by_street = function(obj1, obj2) {
-  var s1_num = obj1.attributes.FULL_NUMBER_STANDARDIZED.match(/^\d*/)[0];
+  var s1_num = obj1.attributes.full_number_standardized.match(/^\d*/)[0];
   var s1_xtra = '';
   if (s1_num != '') {
-	s1_xtra = obj1.attributes.FULL_NUMBER_STANDARDIZED.slice(s1_num.length);
+	s1_xtra = obj1.attributes.full_number_standardized.slice(s1_num.length);
 	s1_num = s1_num * 1 + 1000000;
   }
-  var s1 = obj1.attributes.STREET_NAME + s1_num + s1_xtra + obj1.attributes.UNIT + obj1.attributes.BUILDING_NAME;
+  var s1 = obj1.attributes.street_name + s1_num + s1_xtra + obj1.attributes.unit + obj1.attributes.building_name;
 
-  var s2_num = obj2.attributes.FULL_NUMBER_STANDARDIZED.match(/^\d*/)[0];
+  var s2_num = obj2.attributes.full_number_standardized.match(/^\d*/)[0];
   var s2_xtra = '';
   if (s2_num != '') {
-	s2_xtra = obj2.attributes.FULL_NUMBER_STANDARDIZED.slice(s2_num.length);
+	s2_xtra = obj2.attributes.full_number_standardized.slice(s2_num.length);
 	s2_num = s2_num * 1 + 1000000;
   }
-  var s2 = obj2.attributes.STREET_NAME + s2_num + s2_xtra + obj2.attributes.UNIT + obj2.attributes.BUILDING_NAME;
+  var s2 = obj2.attributes.street_name + s2_num + s2_xtra + obj2.attributes.unit + obj2.attributes.building_name;
 
   return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
 };
@@ -1576,7 +1576,7 @@ MASSGIS.init_datastores = function() {
 					MASSGIS.settings_updateUI();
 				},
 				featureadded: function(obj) {
-					//obj.feature.attributes.STREET_NAME = obj.feature.attributes.STREET_NAME_ID + "";
+					//obj.feature.attributes.street_name = obj.feature.attributes.street_name_id + "";
 					MASSGIS.settings_updateUI();
 					delete obj.feature.data;
 					obj.feature.data = obj.feature.attributes;
@@ -1628,17 +1628,17 @@ MASSGIS.init_datastores = function() {
 			"labelOutlineWidth" : 5,
 			"labelOutlineOpacity" : 0.7,
 			"pointRadius" : 13,
-			"externalGraphic" : "img/${STATUS_COLOR}_${TYPE_ICON}.PNG",
+			"externalGraphic" : "img/${status_color}_${type_icon}.PNG",
 			"display" : "${get_display}"
 		},
 		// the second argument will include all rules
 		{
 			context: {
 				get_label: function(f) {
-					return f.attributes.LABEL_TEXT === null ? "" : f.attributes.LABEL_TEXT;
+					return f.attributes.label_text === null ? "" : f.attributes.label_text;
 				},
 				get_display : function(f) {
-					return (f.attributes.STATUS_COLOR == 'NONE' || f.attributes.TYPE_ICON == 'NONE') ? 'none' : 'visible';
+					return (f.attributes.status_color == 'NONE' || f.attributes.type_icon == 'NONE') ? 'none' : 'visible';
 				}
 			},
 			rules: [
@@ -1673,10 +1673,10 @@ MASSGIS.init_datastores = function() {
 			,renderers: ['Canvas']
 			,maxResolution : 2
 			,draw_linked_st_num : function(f, p) {
-				var features = MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",f.attributes.ADDRESS_POINT_ID);
+				var features = MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",f.attributes.address_point_id);
 				if (features.length > 0) {
-					var f = _.sortBy(features,function(f){return 1000000 + f.attributes.FULL_NUMBER_STANDARDIZED * 1});
-					var n = _.uniq(_.map(f,function(val,key){return val.attributes.FULL_NUMBER_STANDARDIZED}));
+					var f = _.sortBy(features,function(f){return 1000000 + f.attributes.full_number_standardized * 1});
+					var n = _.uniq(_.map(f,function(val,key){return val.attributes.full_number_standardized}));
 					if (n.length == 1) {
 						return n[0];
 					}
@@ -1714,7 +1714,7 @@ MASSGIS.addrptsWriter = new OpenLayers.Format.WFST.v1_0_0({
 	//"featureNS" : "http://www.mapsonline.net/peopleforms",
 	"featurePrefix" : "massgis",
 	"featureType" : "MAD.MAD_ADDRESS_POINTM_CHANGES",
-	"geometryName" : "SHAPE"
+	"geometryName" : "shape"
 });
 
 MASSGIS.mafWriter = new OpenLayers.Format.WFST.v1_0_0({
@@ -1722,15 +1722,15 @@ MASSGIS.mafWriter = new OpenLayers.Format.WFST.v1_0_0({
 	//"featureNS" : "http://www.mapsonline.net/peopleforms",
 	"featurePrefix" : "massgis",
 	"featureType" : "MAD.MAD_MASTER_ADDRESS_CHANGES",
-	"geometryName" : "SHAPE"
+	"geometryName" : "shape"
 });
 
 MASSGIS.wfstFilterGenerator = function(feature, options) {
 	return new OpenLayers.Filter.Comparison(
 		{
 			type: OpenLayers.Filter.Comparison.EQUAL_TO,
-			property:"ADDRESS_POINT_ID",
-			value: feature.attributes.ADDRESS_POINT_ID
+			property:"address_point_id",
+			value: feature.attributes.address_point_id
 		}
 	);
 };
@@ -1743,11 +1743,11 @@ MASSGIS.check_recs_to_submit = function() {
 			// insert the a/d/m records
 			var f = feature.clone();
 			f.state = OpenLayers.State.INSERT;
-			if (f.attributes.ADDRESS_STATUS == 'DELETED') {
-				f.attributes.ADDRESS_POINT_ID = f.attributes.ADDRESS_POINT_ID ? f.attributes.ADDRESS_POINT_ID.replace("_D","") : null;
+			if (f.attributes.address_status == 'DELETED') {
+				f.attributes.address_point_id = f.attributes.address_point_id ? f.attributes.address_point_id.replace("_D","") : null;
 			}
-			f.attributes.LAST_EDIT_BY = MASSGIS.username;
-			f.attributes.LAST_EDIT_DATE = edit_date;
+			f.attributes.last_edit_by = MASSGIS.username;
+			f.attributes.last_edit_date = edit_date;
 
 			delete f.attributes.__MODIFIED__;
 			delete f.attributes.bbox;
@@ -1761,8 +1761,8 @@ MASSGIS.check_recs_to_submit = function() {
 			// insert the a/d/m records
 			var f = feature.clone();
 			f.state = OpenLayers.State.INSERT;
-			f.attributes.LAST_EDIT_BY = MASSGIS.username;
-			f.attributes.LAST_EDIT_DATE = edit_date;
+			f.attributes.last_edit_by = MASSGIS.username;
+			f.attributes.last_edit_date = edit_date;
 
 			delete f.attributes.__MODIFIED__;
 			delete f.attributes.bbox;
@@ -1782,23 +1782,23 @@ MASSGIS.submit_maf_records = function() {
 	var bSaveChanges = false;
 	$.each(MASSGIS.lyr_maf.features, function(idx, feature) {
 		if (feature.attributes.__MODIFIED__) {
-			if (!feature.attributes.MA_CHNG_UID) {
-				//feature.attributes.MA_CHNG_UID = "MA_CHNG_UID_" + MASSGIS.generateTXId();
-				feature.attributes.MA_CHNG_UID = feature.attributes.TRANSACTION_ID + "_" + MASSGIS.generateTXId();
+			if (!feature.attributes.ma_chng_uid) {
+				//feature.attributes.ma_chng_uid = "ma_chng_uid_" + MASSGIS.generateTXId();
+				feature.attributes.ma_chng_uid = feature.attributes.transaction_id + "_" + MASSGIS.generateTXId();
 				feature.state = OpenLayers.State.UPDATE;
 				bSaveChanges = true;
 			}
 			// insert the a/d/m records
 			var f = feature.clone();
 			f.state = OpenLayers.State.INSERT;
-			if (f.attributes.ADDRESS_STATUS == 'DELETED') {
-				f.attributes.ADDRESS_POINT_ID = f.attributes.ADDRESS_POINT_ID ? f.attributes.ADDRESS_POINT_ID.replace("_D","") : null;
+			if (f.attributes.address_status == 'DELETED') {
+				f.attributes.address_point_id = f.attributes.address_point_id ? f.attributes.address_point_id.replace("_D","") : null;
 			}
-			if (("" + f.attributes.MASTER_ADDRESS_ID).indexOf('NEW-') !== -1) {
-				f.attributes.MASTER_ADDRESS_ID = 0;
+			if (("" + f.attributes.master_address_id).indexOf('NEW-') !== -1) {
+				f.attributes.master_address_id = 0;
 			}
-			f.attributes.LAST_EDIT_BY = MASSGIS.username;
-			f.attributes.LAST_EDIT_DATE = edit_date;
+			f.attributes.last_edit_by = MASSGIS.username;
+			f.attributes.last_edit_date = edit_date;
 
 			delete f.attributes.__MODIFIED__;
 			delete f.attributes.bbox;
@@ -1849,7 +1849,7 @@ MASSGIS.submit_maf_records = function() {
 						if (feature.attributes.__MODIFIED__) {
 							// clean up this record
 							delete feature.attributes.__MODIFIED__;
-							delete feature.attributes.MA_CHNG_UID;
+							delete feature.attributes.ma_chng_uid;
 							feature.state = OpenLayers.State.UPDATE;
 						}
 					});
@@ -1879,9 +1879,9 @@ MASSGIS.submit_address_points = function() {
 	var bSaveChanges = false;
 	$.each(MASSGIS.lyr_address_points.features, function(idx, feature) {
 		if (feature.attributes.__MODIFIED__) {
-			if (!feature.attributes.AP_CHNG_UID) {
-				//feature.attributes.AP_CHNG_UID = "AP_CHNG_UID_" + MASSGIS.generateTXId();
-				feature.attributes.AP_CHNG_UID = feature.attributes.TRANSACTION_ID + "_" + MASSGIS.generateTXId();
+			if (!feature.attributes.ap_chng_uid) {
+				//feature.attributes.ap_chng_uid = "ap_chng_uid_" + MASSGIS.generateTXId();
+				feature.attributes.ap_chng_uid = feature.attributes.transaction_id + "_" + MASSGIS.generateTXId();
 				feature.state = OpenLayers.State.UPDATE;
 				bSaveChanges = true;
 			}
@@ -1891,8 +1891,8 @@ MASSGIS.submit_address_points = function() {
 			var f = feature.clone();
 
 			f.geometry.transform(MASSGIS.webMerc, MASSGIS.statePlane);
-			f.attributes.LAST_EDIT_BY = MASSGIS.username;
-			f.attributes.LAST_EDIT_DATE = edit_date;
+			f.attributes.last_edit_by = MASSGIS.username;
+			f.attributes.last_edit_date = edit_date;
 			f.state = OpenLayers.State.INSERT;
 
 			delete f.attributes.__MODIFIED__;
@@ -1942,7 +1942,7 @@ MASSGIS.submit_address_points = function() {
 						if (feature.attributes.__MODIFIED__) {
 							// clean up this record
 							delete feature.attributes.__MODIFIED__;
-							delete feature.attributes.AP_CHNG_UID;
+							delete feature.attributes.ap_chng_uid;
 							feature.state = OpenLayers.State.UPDATE;
 						}
 					});
@@ -1970,7 +1970,10 @@ MASSGIS.sync_address_points = function() {
 	return $.jsonp(
 		{
 			//url: "http://www.mapsonline.net/geoserver-2.1.1/wfs",
-			url: 'https://wsgw.mass.gov/geoserver/wfs',
+			//url: 'https://wsgw.mass.gov/geoserver/wfs',
+		        //url: 'http://10.202.25.161:8080/geoserver/wfs',
+		        url: 'https://giswebservices.dev.maps.digital.mass.gov/geoserver/wfs',
+			//url: 'http://10.202.26.28/geoserver/wfs',
 			data: {
 				"request" : "getfeature",
 				//"typename" : "massgis:massgis_rockportma_address_pointm",
@@ -1979,7 +1982,7 @@ MASSGIS.sync_address_points = function() {
 				"outputformat" : "text/javascript",
 				"service" : "WFS",
 				"version" : "1.0.0",
-				"cql_filter" : "COMMUNITY_ID = '" + $('#msag_community').val() + "'",
+				"cql_filter" : "community_id = '" + $('#msag_community').val() + "'",
 				"srsName" : "EPSG:900913"
 			},
 			callback: "_jqjsp_" + Math.round(Math.random() * 1000000),
@@ -2001,6 +2004,10 @@ MASSGIS.sync_address_points = function() {
 				var features = [];
 				$.each(data.features, function(idx, obj) {
 					var feature = reader.read(obj)[0];
+					if (feature.geometry.CLASS_NAME == "OpenLayers.Geometry.Point") {
+						// remove f.geometry and replace with multi-point variant
+						feature.geometry = new OpenLayers.Geometry.MultiPoint([feature.geometry]);;
+					}
 					feature.state = OpenLayers.State.INSERT;
 					delete feature.data;
 					features.push(feature);
@@ -2026,7 +2033,10 @@ MASSGIS.sync_maf = function() {
 	return $.jsonp(
 		{
 			//url: "http://www.mapsonline.net/geoserver-2.1.1/wfs",
-			url: "https://wsgw.mass.gov/geoserver/wfs",
+			//url: "https://wsgw.mass.gov/geoserver/wfs",
+			//url: "http://10.202.25.161:8080/geoserver/wfs",
+			url: "https://giswebservices.dev.maps.digital.mass.gov/geoserver/wfs",
+                        //url: "http://10.202.26.28/geoserver/wfs",
 			dataType: "jsonp",
 			data: {
 				"request" : "getfeature",
@@ -2036,7 +2046,7 @@ MASSGIS.sync_maf = function() {
 				//"outputformat" : "json",
 				"outputformat" : "text/javascript",
 				"service" : "WFS",
-				"cql_filter" : "COMMUNITY_ID = '" + $('#msag_community').val() + "'",
+				"cql_filter" : "community_id = '" + $('#msag_community').val() + "'",
 				"version" : "1.0.0",
 				"srsName" : "EPSG:900913"
 			},
@@ -2109,27 +2119,27 @@ MASSGIS.buildAddressAutocompletes = function() {
 	MASSGIS.sites_to_site_name_id_hash = {};
 
 	$.each(MASSGIS.lyr_maf.features, function(idx, feature) {
-		if (feature.attributes.STREET_NAME_ID !== null && feature.attributes.STREET_NAME) {
-			if (!MASSGIS.streets_to_street_id_hash[feature.attributes.STREET_NAME]) {
-				MASSGIS.streets_to_street_id_hash[feature.attributes.STREET_NAME] = feature.attributes.STREET_NAME_ID;
+		if (feature.attributes.street_name_id !== null && feature.attributes.street_name) {
+			if (!MASSGIS.streets_to_street_id_hash[feature.attributes.street_name]) {
+				MASSGIS.streets_to_street_id_hash[feature.attributes.street_name] = feature.attributes.street_name_id;
 			}
 		}
 
-		if (feature.attributes.SITE_NAME) {
-			if (!MASSGIS.sites_to_site_id_hash[feature.attributes.SITE_NAME]) {
-				MASSGIS.sites_to_site_id_hash[feature.attributes.SITE_NAME] = feature.attributes.SITE_ID;
+		if (feature.attributes.site_name) {
+			if (!MASSGIS.sites_to_site_id_hash[feature.attributes.site_name]) {
+				MASSGIS.sites_to_site_id_hash[feature.attributes.site_name] = feature.attributes.site_id;
 			}
-			if (!MASSGIS.sites_to_site_name_id_hash[feature.attributes.SITE_NAME]) {
-				MASSGIS.sites_to_site_name_id_hash[feature.attributes.SITE_NAME] = feature.attributes.SITE_NAME_ID;
+			if (!MASSGIS.sites_to_site_name_id_hash[feature.attributes.site_name]) {
+				MASSGIS.sites_to_site_name_id_hash[feature.attributes.site_name] = feature.attributes.site_name_id;
 			}
 		}
 	});
 	MASSGIS.streets_list = Object.keys(MASSGIS.streets_to_street_id_hash);
 
 	// $.each(MASSGIS.lyr_maf.features, function(idx, feature) {
-	// 	if (feature.attributes.SITE_ID !== null && feature.attributes.SITE_NAME) {
-	// 		if (!MASSGIS.sites_to_site_id_hash[feature.attributes.SITE_NAME]) {
-	// 			MASSGIS.sites_to_site_id_hash[feature.attributes.SITE_NAME] = feature.attributes.SITE_ID;
+	// 	if (feature.attributes.site_id !== null && feature.attributes.site_name) {
+	// 		if (!MASSGIS.sites_to_site_id_hash[feature.attributes.site_name]) {
+	// 			MASSGIS.sites_to_site_id_hash[feature.attributes.site_name] = feature.attributes.site_id;
 	// 		}
 	// 	}
 	// });
@@ -2143,13 +2153,13 @@ MASSGIS.renderAddressList = function() {
 	var mafDrawAddrList = [];
 
 	if (MASSGIS.addressListMode == 'status') {
-		featuresToList = _.filter(featuresToList,function(o){return o.attributes.STATUS_COLOR == 'RED'});
+		featuresToList = _.filter(featuresToList,function(o){return o.attributes.status_color == 'RED'});
 	}
 
 	//MASSGIS.lyr_maf.features = MASSGIS.lyr_maf.features.sort(MASSGIS.sort_maf_features_by_street);
 	for (var i = Math.max(0,(MASSGIS.mafDrawOffset - 2)) * MASSGIS.mafDrawMultiple; i < Math.min(featuresToList.length, MASSGIS.mafDrawMultiple * MASSGIS.mafDrawOffset); i++) {
 		if (
-				(featuresToList[i].attributes.ADDRESS_STATUS && featuresToList[i].attributes.ADDRESS_STATUS == 'DELETED') ||
+				(featuresToList[i].attributes.address_status && featuresToList[i].attributes.address_status == 'DELETED') ||
 				(featuresToList[i].state && featuresToList[i].state == OpenLayers.State.DELETE)
 			)
 		{
@@ -2161,7 +2171,7 @@ MASSGIS.renderAddressList = function() {
 	$('#addr_list ul').html(html);
 	$('#addr_list ul').listview('refresh');
 
-	$('#STREET_NAME').trigger("change");
+	$('#street_name').trigger("change");
 };
 
 MASSGIS.loadAndCacheAGSLayer = function(opts) {
@@ -2415,7 +2425,7 @@ MASSGIS.init_map = function() {
 			],
 			"matrix_set": "0to20",
 			"title": "Google_2014_2015_WMTS",
-			"url": "https://orthos.massgis.state.ma.us/login/path/aladdin-eagle-people-holiday/wmts?"
+			"url": "https://orthos.massgis.state.ma.us/login/path/barbara-dominic-ivory-tropic/wmts?"
 		}
 	};
 	MASSGIS.mgisOrthosStatewideLayer2015 = new OpenLayers.Layer.WMTS({
@@ -2568,10 +2578,10 @@ MASSGIS.init_map = function() {
 			featuresadded: function(obj) {
 				//MASSGIS.checkMarkPrimary();
 				$.each(obj.features, function(idx, feature) {
-					if (MASSGIS.linkedAddressLayer.getFeaturesByAttribute("ADDRESS_POINT_ID",feature.attributes.ADDRESS_POINT_ID).length > 0) {
+					if (MASSGIS.linkedAddressLayer.getFeaturesByAttribute("address_point_id",feature.attributes.address_point_id).length > 0) {
 						return;
 					} else {
-						var features = MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",feature.attributes.ADDRESS_POINT_ID);
+						var features = MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",feature.attributes.address_point_id);
 						$.each(features, function(idx, feature) {
 							feature.selStatus = 'pre_selected';
 						});
@@ -2586,7 +2596,7 @@ MASSGIS.init_map = function() {
 	MASSGIS.map.addLayer(MASSGIS.preSelectionLayer);
 
 	MASSGIS.checkMarkPrimary = function() {
-		if (MASSGIS.preSelectionLayer.features.length == 1 && MASSGIS.selectionLayer.features.length == 1 && (MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID",MASSGIS.selectionLayer.features[0].attributes.ADDRESS_POINT_ID)[0]).geometry.components.length > 1) {
+		if (MASSGIS.preSelectionLayer.features.length == 1 && MASSGIS.selectionLayer.features.length == 1 && (MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id",MASSGIS.selectionLayer.features[0].attributes.address_point_id)[0]).geometry.components.length > 1) {
 			var isMarkPrimary = true;
 			$.each(MASSGIS.linkedAddressLayer.features, function(idx, laRec) {
 				if (laRec.selStatus == 'selected') {
@@ -2648,16 +2658,16 @@ MASSGIS.init_map = function() {
 
 		if (potentialSelAddrs.length !== 0) {
 			$.each(potentialSelAddrs, function(idx, mpt) {
-				if (mpt.attributes && mpt.attributes.GEOGRAPHIC_EDIT_STATUS == "DELETED") {
+				if (mpt.attributes && mpt.attributes.geographic_edit_status == "DELETED") {
 					return;
 				}
-				if (mpt.attributes && mpt.attributes.POINT_TYPE == 'GC') {
+				if (mpt.attributes && mpt.attributes.point_type == 'GC') {
 					return;
 				}
-				if (mpt.attributes && mpt.attributes.TYPE_ICON == 'NONE' && mpt.attributes.STATUS_COLOR == 'NONE') {
+				if (mpt.attributes && mpt.attributes.type_icon == 'NONE' && mpt.attributes.status_color == 'NONE') {
 					return;
 				}
-				if (mpt.geometry.components.length > 1) {
+				if (mpt.geometry.components && mpt.geometry.components.length > 1) {
 					$.each(mpt.geometry.components, function(idx, pt) {
 						if (pt && pt.distanceTo(new OpenLayers.Geometry.Point(clickedPt.lon,clickedPt.lat)) < buffer) {
 							selAddrs.push(mpt);
@@ -2698,9 +2708,9 @@ MASSGIS.init_map = function() {
 		$.each(potentialPts, function(idx, mpt) {
 			if (mpt.attributes &&
 				(
-					mpt.attributes.POINT_TYPE == 'GC' ||
-					mpt.attributes.GEOGRAPHIC_EDIT_STATUS == 'DELETED' ||
-					(mpt.attributes.TYPE_ICON == 'NONE' && mpt.attributes.STATUS_COLOR == 'NONE')
+					mpt.attributes.point_type == 'GC' ||
+					mpt.attributes.geographic_edit_status == 'DELETED' ||
+					(mpt.attributes.type_icon == 'NONE' && mpt.attributes.status_color == 'NONE')
 				)
 			) {
 				return;
@@ -2742,13 +2752,13 @@ MASSGIS.init_map = function() {
 				}
 			);
 
-			var existingFeature = MASSGIS.lyr_address_points.getFeaturesByAttribute("ADDRESS_POINT_ID",MASSGIS.preSelectionLayer.features[0].attributes.ADDRESS_POINT_ID);
+			var existingFeature = MASSGIS.lyr_address_points.getFeaturesByAttribute("address_point_id",MASSGIS.preSelectionLayer.features[0].attributes.address_point_id);
 			existingFeature[0].geometry.components.push(newFeature.geometry.components[0].clone());
 			existingFeature[0].geometry.calculateBounds();
 			existingFeature[0].attributes.__MODIFIED__ = true;
-			existingFeature[0].attributes.GEOGRAPHIC_EDIT_STATUS = 'MODIFIED';
-			existingFeature[0].attributes.TRANSACTION_ID = MASSGIS.generateTXId();
-			existingFeature[0].attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+			existingFeature[0].attributes.geographic_edit_status = 'MODIFIED';
+			existingFeature[0].attributes.transaction_id = MASSGIS.generateTXId();
+			existingFeature[0].attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 			existingFeature[0].state = OpenLayers.State.UPDATE;
 			MASSGIS.lyr_address_points.strategies[1].save();
 			MASSGIS.lyr_address_points.events.triggerEvent(
@@ -2774,33 +2784,33 @@ MASSGIS.init_map = function() {
 			);
 
 			var newFeature = MASSGIS.wktReader.read("MULTIPOINT(" + clickedPt.lon + " " + clickedPt.lat + ")");
-			newFeature.attributes.ADDRESS_POINT_ID = 'M_' + Math.round(newLonLat.lon) + '_' + Math.round(newLonLat.lat);
-			newFeature.attributes.STATUS_COLOR = "RED";
-			newFeature.attributes.ADDRESS_STATUS = "UNLINKED";
-			newFeature.attributes.GEOGRAPHIC_EDIT_STATUS = "ADDED";
-			newFeature.attributes.STRUCTURE_TYPE = "M";
-			newFeature.attributes.TYPE_ICON = "CIRCLE";
-			newFeature.attributes.LABEL_TEXT = "";
+			newFeature.attributes.address_point_id = 'M_' + Math.round(newLonLat.lon) + '_' + Math.round(newLonLat.lat);
+			newFeature.attributes.status_color = "RED";
+			newFeature.attributes.address_status = "UNLINKED";
+			newFeature.attributes.geographic_edit_status = "ADDED";
+			newFeature.attributes.structure_type = "M";
+			newFeature.attributes.type_icon = "CIRCLE";
+			newFeature.attributes.label_text = "";
 			var communityId = $('#msag_community').val();
 			if (!communityId || communityId == '') {
 				if (!MASSGIS.lyr_address_points.features) {
 					communityId = -1;
 				} else {
-					communityId = MASSGIS.lyr_address_points.features[0].attributes.COMMUNITY_ID;
+					communityId = MASSGIS.lyr_address_points.features[0].attributes.community_id;
 				}
 				if (!communityId || communityId == '') {
 					communityId = -1;
 				}
 			}
 			if (communityId == -1) {
-				alert("Unable to locate an MSAG COMMUNITY_ID for your new address point.  The COMMUNITY_ID will be assigned after the point is added to the database.");
+				alert("Unable to locate an MSAG community_id for your new address point.  The community_id will be assigned after the point is added to the database.");
 			}
 
-			//newFeature.attributes.COMMUNITY_ID = $('#msag_community').val();
-			newFeature.attributes.COMMUNITY_ID = communityId;
-			newFeature.attributes.POINT_TYPE = "ABC";
-			newFeature.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
-			//newFeature.attributes.GEOGRAPHIC_TOWN_ID = MASSGIS.lyr_address_points.features[0].attributes.GEOGRAPHIC_TOWN_ID;
+			//newFeature.attributes.community_id = $('#msag_community').val();
+			newFeature.attributes.community_id = communityId;
+			newFeature.attributes.point_type = "ABC";
+			newFeature.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
+			//newFeature.attributes.geographic_town_id = MASSGIS.lyr_address_points.features[0].attributes.geographic_town_id;
 
 			// Per discussion on 9/4, newly added points without connected addresses *should* be sent to server
 			// if this is not desired, comment out next line
@@ -2831,10 +2841,10 @@ MASSGIS.init_map = function() {
 						if (component && component.distanceTo(new OpenLayers.Geometry.Point(clickedPt.lon,clickedPt.lat)) < buffer) {
 							var delPt = targetMP.geometry.components.splice(idx, 1);
 							deletedComponents = deletedComponents.concat(delPt);
-							targetMP.attributes.GEOGRAPHIC_EDIT_STATUS = 'MODIFIED';
+							targetMP.attributes.geographic_edit_status = 'MODIFIED';
 							targetMP.attributes.__MODIFIED__ = true;
-							targetMP.attributes.TRANSACTION_ID = txId;
-							targetMP.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+							targetMP.attributes.transaction_id = txId;
+							targetMP.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 							targetMP.state = OpenLayers.State.UPDATE;
 						}
 					});
@@ -2843,21 +2853,21 @@ MASSGIS.init_map = function() {
 						var fullDelete = true;
 						// we deleted the entire geometry.  Mark the feature deleted
 						targetMP.geometry.components = deletedComponents;
-						targetMP.attributes.GEOGRAPHIC_EDIT_STATUS = 'DELETED';
-						targetMP.attributes.STATUS_COLOR = 'NONE';
-						targetMP.attributes.TRANSACTION_ID = txId;
-						targetMP.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+						targetMP.attributes.geographic_edit_status = 'DELETED';
+						targetMP.attributes.status_color = 'NONE';
+						targetMP.attributes.transaction_id = txId;
+						targetMP.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 						targetMP.state = OpenLayers.State.UPDATE;
 
 						// we also need to mark any address records that were originally associated with this
-						// point as ADDRESS_POINT_ID = null
-						$.each(MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",targetMP.attributes.ADDRESS_POINT_ID), function(idx, madRec) {
-							madRec.attributes.STATUS_COLOR = 'RED';
-							madRec.attributes.ADDRESS_POINT_ID = '';
-							madRec.attributes.ADDRESS_STATUS = 'UNLINKED';
+						// point as address_point_id = null
+						$.each(MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",targetMP.attributes.address_point_id), function(idx, madRec) {
+							madRec.attributes.status_color = 'RED';
+							madRec.attributes.address_point_id = '';
+							madRec.attributes.address_status = 'UNLINKED';
 							madRec.attributes.__MODIFIED__ = true;
-							madRec.attributes.TRANSACTION_ID = txId;
-							madRec.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+							madRec.attributes.transaction_id = txId;
+							madRec.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 							madRec.state = OpenLayers.State.UPDATE;
 						});
 						MASSGIS.lyr_maf.strategies[1].save();
@@ -2873,12 +2883,12 @@ MASSGIS.init_map = function() {
 							 MASSGIS.map.getProjectionObject()
 							,new OpenLayers.Projection('EPSG:26986')
 						);
-						delClone.attributes.ADDRESS_POINT_ID = "M_" + Math.round(newCentroid.x) + "_" + Math.round(newCentroid.y);
-						delClone.attributes.STATUS_COLOR = 'NONE';
-						delClone.attributes.GEOGRAPHIC_EDIT_STATUS = 'DELETED';
+						delClone.attributes.address_point_id = "M_" + Math.round(newCentroid.x) + "_" + Math.round(newCentroid.y);
+						delClone.attributes.status_color = 'NONE';
+						delClone.attributes.geographic_edit_status = 'DELETED';
 						delClone.attributes.__MODIFIED__ = true;
-						delClone.attributes.TRANSACTION_ID = txId;
-						delClone.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+						delClone.attributes.transaction_id = txId;
+						delClone.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 
 						delClone.state = OpenLayers.State.INSERT;
 						MASSGIS.lyr_address_points.addFeatures([delClone]);
@@ -2891,7 +2901,7 @@ MASSGIS.init_map = function() {
 					}
 
 					// also clear out the pre-selected or selected version of this point
-					var presel = MASSGIS.preSelectionLayer.getFeaturesByAttribute("ADDRESS_POINT_ID",targetMP.attributes.ADDRESS_POINT_ID);
+					var presel = MASSGIS.preSelectionLayer.getFeaturesByAttribute("address_point_id",targetMP.attributes.address_point_id);
 					if (presel.length > 0 ) {
 						MASSGIS.preSelectionLayer.removeFeatures(presel);
 						if (!fullDelete) {
@@ -2899,7 +2909,7 @@ MASSGIS.init_map = function() {
 						}
 					}
 
-					var sel = MASSGIS.selectionLayer.getFeaturesByAttribute("ADDRESS_POINT_ID",targetMP.attributes.ADDRESS_POINT_ID);
+					var sel = MASSGIS.selectionLayer.getFeaturesByAttribute("address_point_id",targetMP.attributes.address_point_id);
 					if (sel.length > 0) {
 						MASSGIS.selectionLayer.removeFeatures(sel);
 						// if (!fullDelete) {
@@ -2933,9 +2943,9 @@ MASSGIS.init_map = function() {
 					$.each(targetMP.geometry.components, function(idx, component) {
 						if (component && component.distanceTo(new OpenLayers.Geometry.Point(clickedPt.lon,clickedPt.lat)) < buffer) {
 							secondaryPointCoords.push(targetMP.geometry.components.splice(idx, 1)[0]);
-							targetMP.attributes.GEOGRAPHIC_EDIT_STATUS = 'SPLIT';
-							targetMP.attributes.TRANSACTION_ID = txId;
-							targetMP.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+							targetMP.attributes.geographic_edit_status = 'SPLIT';
+							targetMP.attributes.transaction_id = txId;
+							targetMP.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 							targetMP.attributes.__MODIFIED__ = true;
 							targetMP.state = OpenLayers.State.UPDATE;
 						}
@@ -2945,25 +2955,25 @@ MASSGIS.init_map = function() {
 							targetMP.layer.removeFeatures([targetMP]);
 						} else {
 							// we marked the entire geometry as SECONDARY, no need to do a split
-							targetMP.attributes.GEOGRAPHIC_EDIT_STATUS = 'UNLINKED';
-							targetMP.attributes.STATUS_COLOR = 'GRAY';
-							targetMP.attributes.TRANSACTION_ID = txId;
-							targetMP.attributes.STRUCTURE_STATUS = 'S';
-							targetMP.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+							targetMP.attributes.geographic_edit_status = 'UNLINKED';
+							targetMP.attributes.status_color = 'GRAY';
+							targetMP.attributes.transaction_id = txId;
+							targetMP.attributes.structure_status = 'S';
+							targetMP.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 							targetMP.attributes.__MODIFIED__ = true;
 							targetMP.state = OpenLayers.State.UPDATE;
 							targetMP.geometry.components = secondaryPointCoords;
 
 							// we also need to mark any address records that were originally associated with this
-							// point as ADDRESS_POINT_ID = null
-							$.each(MASSGIS.lyr_maf.getFeaturesByAttribute("ADDRESS_POINT_ID",targetMP.attributes.ADDRESS_POINT_ID), function(idx, madRec) {
-								madRec.attributes.STATUS_COLOR = 'RED';
-								madRec.attributes.ADDRESS_POINT_ID = '';
-								madRec.attributes.ADDRESS_STATUS = 'UNLINKED';
-								madRec.attributes.TRANSACTION_ID = txId;
-								madRec.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+							// point as address_point_id = null
+							$.each(MASSGIS.lyr_maf.getFeaturesByAttribute("address_point_id",targetMP.attributes.address_point_id), function(idx, madRec) {
+								madRec.attributes.status_color = 'RED';
+								madRec.attributes.address_point_id = '';
+								madRec.attributes.address_status = 'UNLINKED';
+								madRec.attributes.transaction_id = txId;
+								madRec.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 								madRec.attributes.__MODIFIED__ = true;
-								MASSGIS.undoStack.madRecIds.push(madRec.MASTER_ADDRESS_ID);
+								MASSGIS.undoStack.madRecIds.push(madRec.master_address_id);
 							});
 							MASSGIS.lyr_maf.strategies[1].save();
 							MASSGIS.renderAddressList();
@@ -2976,18 +2986,18 @@ MASSGIS.init_map = function() {
 							 MASSGIS.map.getProjectionObject()
 							,new OpenLayers.Projection('EPSG:26986')
 						);
-						newPoint.attributes.ADDRESS_POINT_ID = "M_" + Math.round(newCentroid.x) + "_" + Math.round(newCentroid.y);
-						newPoint.attributes.STATUS_COLOR = "GRAY";
-						newPoint.attributes.ADDRESS_STATUS = "UNLINKED";
-						newPoint.attributes.GEOGRAPHIC_EDIT_STATUS = "SPLIT";
-						newPoint.attributes.STRUCTURE_STATUS = "S";
-						newPoint.attributes.LABEL_TEXT = "";
-						newPoint.attributes.SITE_ID	= targetMP.attributes.SITE_ID;
-						newPoint.attributes.COMMUNITY_ID = targetMP.attributes.COMMUNITY_ID;
-						newPoint.attributes.LOC_ID = targetMP.attributes.LOC_ID;
-						newPoint.attributes.GEOGRAPHIC_TOWN_ID = targetMP.attributes.GEOGRAPHIC_TOWN_ID;
-						newPoint.attributes.TRANSACTION_ID = txId;
-						newPoint.attributes.TIME_STAMP = new Date().toTimeString().split(" ")[0];
+						newPoint.attributes.address_point_id = "M_" + Math.round(newCentroid.x) + "_" + Math.round(newCentroid.y);
+						newPoint.attributes.status_color = "GRAY";
+						newPoint.attributes.address_status = "UNLINKED";
+						newPoint.attributes.geographic_edit_status = "SPLIT";
+						newPoint.attributes.structure_status = "S";
+						newPoint.attributes.label_text = "";
+						newPoint.attributes.site_id	= targetMP.attributes.site_id;
+						newPoint.attributes.community_id = targetMP.attributes.community_id;
+						newPoint.attributes.loc_id = targetMP.attributes.loc_id;
+						newPoint.attributes.geographic_town_id = targetMP.attributes.geographic_town_id;
+						newPoint.attributes.transaction_id = txId;
+						newPoint.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 						newPoint.attributes.__MODIFIED__ = true;
 						newPoint.state = OpenLayers.State.INSERT;
 
@@ -3073,8 +3083,8 @@ MASSGIS.pointsSelected = function(aFeatures, clickedPt, buffer) {
 		p.style = null;
 		MASSGIS.map.setLayerZIndex(MASSGIS.preSelectionLayer, 6);
 		MASSGIS.map.setLayerZIndex(MASSGIS.selectionLayer, 12);
-		var preSelectionPt = MASSGIS.preSelectionLayer.getFeaturesByAttribute("ADDRESS_POINT_ID",oPoint.attributes.ADDRESS_POINT_ID);
-		var potentialSelectionPts = MASSGIS.selectionLayer.getFeaturesByAttribute("ADDRESS_POINT_ID",oPoint.attributes.ADDRESS_POINT_ID);
+		var preSelectionPt = MASSGIS.preSelectionLayer.getFeaturesByAttribute("address_point_id",oPoint.attributes.address_point_id);
+		var potentialSelectionPts = MASSGIS.selectionLayer.getFeaturesByAttribute("address_point_id",oPoint.attributes.address_point_id);
 		var selectionPts = [];
 		// neeed to be more specific on the selectionPts part.  Did we actually CLICK on a selection point?
 		$.each(potentialSelectionPts, function(idx, selPt) {
@@ -3086,7 +3096,7 @@ MASSGIS.pointsSelected = function(aFeatures, clickedPt, buffer) {
 			// we clicked on a selection point.  Put it "back" with its corresponding pre-selection point.
 			MASSGIS.selectionLayer.removeFeatures(selectionPts);
 			$.each(selectionPts, function(idx, selPt) {
-				var preSelectionPt = MASSGIS.preSelectionLayer.getFeaturesByAttribute("ADDRESS_POINT_ID",selPt.attributes.ADDRESS_POINT_ID);
+				var preSelectionPt = MASSGIS.preSelectionLayer.getFeaturesByAttribute("address_point_id",selPt.attributes.address_point_id);
 				if (preSelectionPt.length > 0) {
 					// add this component back to its parent "pre-selection" point
 					preSelectionPt[0].geometry.components = preSelectionPt[0].geometry.components.concat(selPt.geometry.components);

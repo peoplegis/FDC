@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -38,8 +39,10 @@
 -->
 	<script type="text/javascript">
 var MASSGIS = {};
-MASSGIS.proxy = "/cgi-bin/proxy_auth_fdc.cgi?url=https://wsgw.mass.gov/geoserver/wfs";
-
+//MASSGIS.proxy = "/cgi-bin/proxy_auth_fdc.cgi?url=https://wsgw.mass.gov/geoserver/wfs";
+//MASSGIS.proxy = "/cgi-bin/proxy_auth_fdc.cgi?url=http://10.202.25.161:8080/geoserver/wfs";
+//MASSGIS.proxy = "/cgi-bin/proxy_auth_fdc.cgi?url=http://10.202.26.28/geoserver/wfs";
+MASSGIS.proxy = "/cgi-bin/proxy_auth_fdc.cgi?url=https://giswebservices.dev.maps.digital.mass.gov/geoserver/wfs";
 // customize GPS point styling here
 MASSGIS.pointRadius = "10"; // size of point
 MASSGIS.fillColor = "#00ff00"; // color on the inside of the point
@@ -201,22 +204,22 @@ MASSGIS.fillOpacity = .7; // opacity of gps point (0 = completely clear, 1 = ful
 			<h2>Edit Address</h2>
 			<div>
 				<div style="float:left; width:15%; padding-left: 10px">
-					<input type="text" id="edit_FULL_NUMBER_STANDARDIZED" maxlength="30" data-mini="true" placeholder="addr #" />
+					<input type="text" id="edit_full_number_standardized" maxlength="30" data-mini="true" placeholder="addr #" />
 				</div>
 				<div style="float:left; width:55%; padding-left:10px">
-					<input type="text" id="edit_STREET_NAME" maxlength="80" data-mini="true" placeholder="street name" />
+					<input type="text" id="edit_street_name" maxlength="80" data-mini="true" placeholder="street name" />
 				</div>
 				<div style="float:left; width:22%; padding-left:10px">
 					<input type="text" id="edit_REL_LOC" maxlength="80" data-mini="true" placeholder="location" />
 				</div>
 				<div style="clear: both; float:left; width:25%; padding-left: 10px">
-					<input type="text" id="edit_UNIT" maxlength="40" data-mini="true" placeholder="unit #" />
+					<input type="text" id="edit_unit" maxlength="40" data-mini="true" placeholder="unit #" />
 				</div>
 				<div style="float:left; width:25%; padding-left: 10px">
-					<input type="text" id="edit_SITE_NAME" maxlength="150" data-mini="true" placeholder="site name" />
+					<input type="text" id="edit_site_name" maxlength="150" data-mini="true" placeholder="site name" />
 				</div>
 				<div style="float:left; width:42%; padding-left:10px">
-					<input type="text" id="edit_BUILDING_NAME" maxlength="50" data-mini="true" placeholder="building" />
+					<input type="text" id="edit_building_name" maxlength="50" data-mini="true" placeholder="building" />
 				</div>
 				<div style="clear: both; float:left; width:95%; padding-left:10px">
 					<input type="text" id="edit_LAST_EDIT_COMMENTS" maxlength="200" data-mini="true" placeholder="notes" />
@@ -304,22 +307,22 @@ MASSGIS.fillOpacity = .7; // opacity of gps point (0 = completely clear, 1 = ful
 							<header><h2>Search for Addresses</h2></header>
 							<div id="addr_query_inputs" style="height:84px;">
 								<div style="float:left; width:15%; padding-left: 10px">
-									<input type="text" id="FULL_NUMBER_STANDARDIZED" data-mini="true" placeholder="addr #" />
+									<input type="text" id="full_number_standardized" data-mini="true" placeholder="addr #" />
 								</div>
 								<div style="float:left; width:55%; padding-left: 10px">
-									<input type="text" id="STREET_NAME" data-mini="true" placeholder="street name" />
+									<input type="text" id="street_name" data-mini="true" placeholder="street name" />
 								</div>
 								<div style="float:right; width:22%; padding-right:10px">
 									<input type="text" id="REL_LOC" data-mini="true" placeholder="location" />
 								</div>
 								<div style="clear: both; float:left; width:15%; padding-left:10px">
-									<input type="text" id="UNIT" data-mini="true" placeholder="unit #" />
+									<input type="text" id="unit" data-mini="true" placeholder="unit #" />
 								</div>
 								<div style="float:left; width:27%; padding-left:10px">
-									<input type="text" id="SITE_NAME" data-mini="true" placeholder="site name" />
+									<input type="text" id="site_name" data-mini="true" placeholder="site name" />
 								</div>
 								<div style="float:left; width:26%; padding-left: 12px">
-									<input type="text" id="BUILDING_NAME" data-mini="true" placeholder="building" />
+									<input type="text" id="building_name" data-mini="true" placeholder="building" />
 								</div>
 								<div style="float:right; width:22%; padding-right:10px">
 									<a class="custom_button" data-theme="b" data-role="button" id="select_all_addr">Select all</a>
@@ -800,12 +803,12 @@ MASSGIS.fillOpacity = .7; // opacity of gps point (0 = completely clear, 1 = ful
 <script id="linkedAddressesTmpl" type="text/x-jsrender">
 	<li style="background-color: {{>backgroundColor}}" data-id="{{>id}}" class="full_addr">
 		<span
-			title="{{>attributes.FULL_NUMBER_STANDARDIZED}} {{>attributes.STREET_NAME}} {{>attributes.UNIT}} {{>attributes.SITE_NAME}} {{>attributes.BUILDING_NAME}}"
+			title="{{>attributes.full_number_standardized}} {{>attributes.street_name}} {{>attributes.unit}} {{>attributes.site_name}} {{>attributes.building_name}}"
 			style="display: inline-block; box-shadow: none; width:60%; overflow: hidden; white-space: nowrap;">
-			{{>attributes.FULL_NUMBER_STANDARDIZED}} {{>attributes.STREET_NAME}}
-			{{if attributes.BUILDING_NAME}}, B: {{>attributes.BUILDING_NAME}} {{/if}}
-			{{if attributes.UNIT}}, U: {{>attributes.UNIT}} {{/if}}
-			{{if attributes.SITE_NAME}}, S: {{>attributes.SITE_NAME}} {{/if}}
+			{{>attributes.full_number_standardized}} {{>attributes.street_name}}
+			{{if attributes.building_name}}, B: {{>attributes.building_name}} {{/if}}
+			{{if attributes.unit}}, U: {{>attributes.unit}} {{/if}}
+			{{if attributes.site_name}}, S: {{>attributes.site_name}} {{/if}}
 		</span>
 
 		<span data-type="horizontal" data-role="controlgroup" data-mini="true" data-shadow="true" class="custom-list-aside">
@@ -818,16 +821,16 @@ MASSGIS.fillOpacity = .7; // opacity of gps point (0 = completely clear, 1 = ful
 </script>
 
 <script id="addressListTmpl" type="text/x-jsrender">
-	{{if attributes.EDIT_STATUS != 'DELETED'}}
+	{{if attributes.edit_status != 'DELETED'}}
 	<li data-fid="{{>fid}}">
 		<span
-		{{if attributes.STATUS_COLOR == 'RED')}}
+		{{if attributes.status_color == 'RED')}}
 		  class="no_address_point_id"
 		{{/if}}
-		>{{>attributes.FULL_NUMBER_STANDARDIZED}} {{>attributes.STREET_NAME}}
-			{{if attributes.BUILDING_NAME}}, B: {{>attributes.BUILDING_NAME}} {{/if}}
-			{{if attributes.UNIT}}, U: {{>attributes.UNIT}} {{/if}}
-			{{if attributes.SITE_NAME}}, S: {{>attributes.SITE_NAME}} {{/if}}</span>
+		>{{>attributes.full_number_standardized}} {{>attributes.street_name}}
+			{{if attributes.building_name}}, B: {{>attributes.building_name}} {{/if}}
+			{{if attributes.unit}}, U: {{>attributes.unit}} {{/if}}
+			{{if attributes.site_name}}, S: {{>attributes.site_name}} {{/if}}</span>
 	</li>
 	{{/if}}
 </script>
