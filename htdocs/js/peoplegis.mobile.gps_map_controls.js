@@ -80,8 +80,8 @@
 				styleMap :  new OpenLayers.StyleMap({
 					"default": new OpenLayers.Style({
 						pointRadius: this.options.pointRadius,
-						fillColor: this.options.fillColor,
-						strokeColor: this.options.strokeColor,
+						fillColor: '#984ea3',
+						strokeColor: '#2d1730',
 						strokeWidth: this.options.strokeWidth,
 						fillOpacity: this.options.fillOpacity,
 						graphicZIndex: 1
