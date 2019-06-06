@@ -389,7 +389,8 @@ setTimeout(function() {
 				if (
 					!feature.attributes[term.attr]
 					|| (term.attr == 'full_number_standardized' && feature.attributes[term.attr].toUpperCase() != term.val.toUpperCase())
-					|| feature.attributes[term.attr].toUpperCase().indexOf(term.val.toUpperCase()) == -1
+					// Treat a * entered by the user as a .* RegExp wildcard.
+					|| !(new RegExp('^' + term.val.replace(/\*/g, '.*'), 'i').test(feature.attributes[term.attr]))
 				) {
 					m = false;
 					return false;
