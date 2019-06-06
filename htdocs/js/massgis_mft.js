@@ -324,6 +324,17 @@ MASSGIS.init_ui = function() {
 		$('#addr_query').css('display','block');
 		$('#addr_query').height($('#addr_list').height());
 		$('#addr_query_res').height($('#addr_list').height() - $('#addr_query_inputs').height() - $('#addr_query header').height());
+		$('#clear_addr_query').on("click",function() {
+			// Clear the search fields.
+			$.each($("#addr_query input"), function(idx, elt) {
+				$(elt).val('');
+			});
+
+			// Clear the results.
+			MASSGIS.addressQueryResults = [];
+			$('#addr_query ul').html('');
+			$('#addr_query ul').listview('refresh');
+		});
 		$('#select_all_addr').on("click",function() {
 				MASSGIS.showModalMessage('Working...',true);
 // Give the loading message a chance to fire.
