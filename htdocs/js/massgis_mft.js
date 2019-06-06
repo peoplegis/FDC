@@ -1441,6 +1441,12 @@ setTimeout(function() {
 		MASSGIS.renderLinkedAddresses();
 		MASSGIS.renderAddressList();
 	});
+	$('#edit_popup input').on('keypress', function(evt) {
+		// Trigger a save when a user presses ENTER.
+		if (evt.which == 13) {
+			$('#edit_popup a[data-icon="check"]').click();
+		}
+	});
 	$('#linked_addrs').on("click",'div[data-action="click_to_hide"]',function(e) {
 		var f = MASSGIS.linkedAddressLayer.getFeatureByFid($(this).data('fid'));
 		MASSGIS.linkedAddressLayer.removeFeatures([f]);
