@@ -814,7 +814,7 @@ MASSGIS.fillOpacity = .7; // opacity of gps point (0 = completely clear, 1 = ful
 	<li style="background-color: {{>backgroundColor}}" data-id="{{>id}}" class="full_addr">
 		<span
 			title="{{>attributes.full_number_standardized}} {{>attributes.street_name}} {{>attributes.unit}} {{>attributes.site_name}} {{>attributes.building_name}}"
-			style="display: inline-block; box-shadow: none; width:60%; overflow: hidden; white-space: nowrap;">
+			style="display: inline-block; box-shadow: none; width:60%; overflow: hidden; white-space: nowrap; {{if (attributes.is_copy == 'yes')}} ;font-style:italic {{/if}}">
 			{{>attributes.full_number_standardized}} {{>attributes.street_name}}
 			{{if attributes.building_name}}, B: {{>attributes.building_name}} {{/if}}
 			{{if attributes.unit}}, U: {{>attributes.unit}} {{/if}}
