@@ -663,6 +663,11 @@ setTimeout(function() {
 				console.log("linkedAddressLayer restored");
 				MASSGIS.renderLinkedAddresses();
 			}
+			else if (MASSGIS.undoStack.action == 'new_address_point') {
+				MASSGIS.lyr_address_points.removeFeatures(MASSGIS.undoStack.f);
+				MASSGIS.lyr_address_points.strategies[1].save();
+				MASSGIS.lyr_address_points.redraw();
+			}
 			else {
 				nothing_to_undo = true;
 			}
@@ -2791,6 +2796,12 @@ MASSGIS.init_map = function() {
 				return;
 			}
 
+			// Start w/ a clean undo stack.
+			MASSGIS.undoStack = {
+				action: 'new_address_point',
+				f: []
+			};
+
 			// Create new address_point_id in MASSGIS-friendly projection coords.
 			var newLonLat = new OpenLayers.LonLat(clickedPt.lon,clickedPt.lat).transform(
 				 MASSGIS.map.getProjectionObject()
@@ -2830,6 +2841,9 @@ MASSGIS.init_map = function() {
 			// if this is not desired, comment out next line
 			newFeature.attributes.__MODIFIED__ = true;
 			newFeature.state = OpenLayers.State.INSERT;
+
+			// Add this new feature to the undo stack.
+			MASSGIS.undoStack.f.push(newFeature);
 
 			MASSGIS.lyr_address_points.addFeatures([newFeature]);
 			MASSGIS.lyr_address_points.strategies[1].save();
