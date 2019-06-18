@@ -1228,6 +1228,7 @@ setTimeout(function() {
 		f.attributes.street_name_id = null;
 		f.attributes.subsite = null;
 		f.attributes.unit = null;
+		f.attributes.address_class = null;
 		//edit_status changes
 		//f.attributes.address_status = 'UNASSIGNED';
 		//f.attributes.edit_status = 'ADDED';
@@ -1318,6 +1319,10 @@ setTimeout(function() {
 		$.each(f.attributes, function(attr, value) {
 			$('#edit_' + attr).length > 0 && (f.attributes[attr] = $('#edit_' + attr).val());
 		});
+
+		// Special case for address_class (Residential?)
+		f.attributes.address_class = $('#edit_address_class').prop('checked') ? 'RES' : null;
+
 //		edit_status changes
 //		if (!f.attributes.edit_status || f.attributes.edit_status != "ADDED") {
 //			f.attributes.edit_status = 'MODIFIED';
@@ -1477,6 +1482,11 @@ setTimeout(function() {
 		$.each(f.attributes, function(attr, value) {
 			$('#edit_' + attr) && $('#edit_' + attr).val(value);
 		});
+
+		// Special case for address_class (Residential?)
+		$('#edit_address_class')
+			.prop('checked', f.attributes.address_class == 'RES')
+			.checkboxradio('refresh');
 
 		// set up the autocomplete on the popup
 		$('#edit_street_name').autocomplete({
