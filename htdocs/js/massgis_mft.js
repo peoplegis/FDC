@@ -537,6 +537,10 @@ setTimeout(function() {
 		MASSGIS.linkedAddressLayer.removeAllFeatures();
 	});
 
+	$('#linked_addrs_buttons #clear_addr_button').on("click",function() {
+		MASSGIS.linkedAddressLayer.removeAllFeatures();
+	});
+
 	$('#linked_addrs_buttons #undo_button').on("click",function() {
 		var nothing_to_undo = false;
 		MASSGIS.showModalMessage('Working...',true);
