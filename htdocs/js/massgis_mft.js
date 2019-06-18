@@ -398,14 +398,8 @@ setTimeout(function() {
 			m && MASSGIS.addressQueryResults.push(feature);
 		});
 
-		//console.log(MASSGIS.addressQueryResults.length + " features found");
-		if (MASSGIS.addressQueryResults.length == 0) {
-			html = "<li style='color: #903'>No Matching Addresses Found</li>";
-		} else {
-			var html = $('#addressListTmpl').render(MASSGIS.addressQueryResults);
-		}
-		$('#addr_query ul').html(html);
-		$('#addr_query ul').listview('refresh');
+		MASSGIS.mqfDrawOffset = 1;
+		MASSGIS.renderQueryResults();
 	});
 
 	$('#settings_clear').on("click",function() {
@@ -1088,6 +1082,27 @@ setTimeout(function() {
 		MASSGIS.map.pan(1,1); // This nudge takes care of Canvas labeling artifacts.
 		MASSGIS.hideModalMessage();
 },100);
+	});
+
+	$('#addr_query_res').on('scroll', function() {
+		if ($(this).scrollTop() === 0) {
+			MASSGIS.mqfDrawOffset = Math.max(1, MASSGIS.mqfDrawOffset - 1);
+			MASSGIS.renderQueryResults();
+			if (MASSGIS.mqfDrawOffset === 1) {
+				$(this).scrollTo(0);
+			} else {
+				$(this).scrollTo('50%');
+			}
+		}
+		if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight - 1) {
+			MASSGIS.mqfDrawOffset = Math.min(MASSGIS.mqfDrawOffset + 1, Math.ceil(MASSGIS.addressQueryResults.length / MASSGIS.mqfDrawMultiple));
+			MASSGIS.renderQueryResults();
+			if (MASSGIS.mqfDrawOffset === Math.ceil(MASSGIS.addressQueryResults.length / MASSGIS.mqfDrawMultiple)) {
+				$(this).scrollTo('100%');
+			} else {
+				$(this).scrollTo('50%');
+			}
+		}
 	});
 
 	$('#addr_list > div').on('scroll', function() {
@@ -2146,6 +2161,7 @@ MASSGIS.renderLinkedAddresses = function() {
 
 MASSGIS.mafDrawOffset = 1;
 MASSGIS.mafDrawMultiple = 35;
+MASSGIS.mqfDrawMultiple = 35;
 MASSGIS.buildAddressAutocompletes = function() {
 	MASSGIS.streets_to_street_id_hash = {};
 	MASSGIS.sites_to_site_id_hash = {};
@@ -2178,6 +2194,22 @@ MASSGIS.buildAddressAutocompletes = function() {
 	// });
 	MASSGIS.sites_list = Object.keys(MASSGIS.sites_to_site_id_hash);
 };
+
+MASSGIS.renderQueryResults = function() {
+	//console.log(MASSGIS.addressQueryResults.length + " features found");
+	var html = "<li style='color: #903'>No Matching Addresses Found</li>";
+
+	var mqfDrawAddrList = [];
+	if (MASSGIS.addressQueryResults.length > 0) {
+		for (var i = Math.max(0,(MASSGIS.mqfDrawOffset - 2)) * MASSGIS.mqfDrawMultiple; i < Math.min(MASSGIS.addressQueryResults.length, MASSGIS.mqfDrawMultiple * MASSGIS.mqfDrawOffset); i++) {
+			mqfDrawAddrList.push(MASSGIS.addressQueryResults[i]);
+		}
+		html = $('#addressListTmpl').render(mqfDrawAddrList);
+	}
+
+	$('#addr_query ul').html(html);
+	$('#addr_query ul').listview('refresh');
+}
 
 MASSGIS.renderAddressList = function() {
 	var featuresToList = /street|status/.test(MASSGIS.addressListMode)
