@@ -1274,15 +1274,12 @@ setTimeout(function() {
 		//f.attributes.master_address_id = 0;
 		f.attributes.master_address_id = 'NEW-' + Math.random();
 		f.attributes.status_color = 'RED';
-		//edit_status changes
-		//f.attributes.address_status = 'UNASSIGNED';
-		//f.attributes.edit_status = 'ADDED';
+		f.attributes.last_edit_comments = 'COPY ' + (f.attributes.last_edit_comments || '').replace(/^COPY /, '');
+		f.attributes.is_copy = 'yes';
 		f.attributes.address_status = 'ADDED';
 		f.attributes.transaction_id = MASSGIS.generateTXId();
 		f.attributes.time_stamp = new Date().toTimeString().split(" ")[0];
 		f.attributes.__MODIFIED__ = true;
-		f.attributes.last_edit_comments = 'COPY ' + (f.attributes.last_edit_comments || '').replace(/^COPY /, '');
-		f.attributes.is_copy = 'yes';
 		delete f.fid;
 		MASSGIS.lyr_maf.addFeatures([f]);
 		MASSGIS.lyr_maf.strategies[1].save();
