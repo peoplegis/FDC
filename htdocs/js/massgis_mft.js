@@ -1591,7 +1591,7 @@ MASSGIS.sort_maf_features_by_street = function(obj1, obj2) {
 	s1_xtra = obj1.attributes.full_number_standardized.slice(s1_num.length);
 	s1_num = s1_num * 1 + 1000000;
   }
-  var s1 = obj1.attributes.street_name + s1_num + s1_xtra + obj1.attributes.unit + obj1.attributes.building_name;
+  var s1 = [obj1.attributes.street_name, s1_num, s1_xtra, obj1.attributes.unit, obj1.attributes.building_name].join(' ');
 
   var s2_num = obj2.attributes.full_number_standardized.match(/^\d*/)[0];
   var s2_xtra = '';
@@ -1599,7 +1599,7 @@ MASSGIS.sort_maf_features_by_street = function(obj1, obj2) {
 	s2_xtra = obj2.attributes.full_number_standardized.slice(s2_num.length);
 	s2_num = s2_num * 1 + 1000000;
   }
-  var s2 = obj2.attributes.street_name + s2_num + s2_xtra + obj2.attributes.unit + obj2.attributes.building_name;
+  var s2 = [obj2.attributes.street_name, s2_num, s2_xtra, obj2.attributes.unit, obj2.attributes.building_name].join(' ');
 
   return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
 };
